@@ -10,7 +10,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Update the quanitites Ux, Uy, Uz (t -> t + dt)
-function [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,N,grid)
+function [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid)
 
 % **** IMPORTANT ****
 %Interp all values to cell-centered quantities?
@@ -25,8 +25,7 @@ Uz = interp_edge_to_center(Uz);
 %Grab the vector values (at original time)
 h = grid.dt;
 m0 = grid.m0;
-N_CC = interp_edge_to_center(N);
-qmdt = 0.5*h./(N_CC*m0); %(charge already on B and E_field)
+qmdt = grid.e0*0.5*h./(m0); %(charge already on B and E_field)
 c = grid.c;
 E_0 = qmdt.*Ex;
 E_1 = qmdt.*Ey;
@@ -70,6 +69,11 @@ Vy = Uy./gamma_n_plus_1;
 Vz = Uz./gamma_n_plus_1;
 
 %Interpolate Back 
+% interp_center_to_edge() Procedure
+%[  A   B   C   D  ] - Centered Values
+%    \ / \ / \ /
+%[P   X   Y   Z   P] - Edge Values
+% P = (A + D)/2 
 Uy = interp_center_to_edge(Uy);
 Uz = interp_center_to_edge(Uz);
 Vy = interp_center_to_edge(Vy);

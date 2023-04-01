@@ -1,24 +1,28 @@
 %Diagnostics
-function grid = diagnostics(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,grid)
+function grid = diagnostics(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,Ux,Uy,Uz,N,grid)
 
 % Extra calculations:
 % Eliminate double dounting edge cells
+    Nx = grid.Nx;
 
+    %Total Energy Calcs
 grid.Total_Energy_E_field(grid.iter) = (grid.eps_0/2) * ( sum(Ex.*Ex) +...
-    sum(Ey(grid.Ey_i_0:grid.Ey_i_end).*Ey(grid.Ey_i_0:grid.Ey_i_end)) +...
-    sum(Ez(grid.Ez_i_0:grid.Ez_i_end).*Ez(grid.Ez_i_0:grid.Ez_i_end)) );
+    sum(Ey(1:Nx-1).*Ey(1:Nx-1)) +...
+    sum(Ez(1:Nx-1).*Ez(1:Nx-1)) );
 grid.Total_Energy_B_field(grid.iter) = (1/(grid.mu_0*2)) * ( sum(Bx.*Bx) + sum(By.*By) + sum(Bz.*Bz) );
 grid.Total_Energy_field(grid.iter) = grid.Total_Energy_E_field(grid.iter)  + grid.Total_Energy_B_field(grid.iter);
+grid.Total_Energy_ptcls(grid.iter) = sum(grid.m0*N(1:Nx-1)*(0.5).* (Ux.*Ux +...
+    Uy(1:Nx-1).*Uy(1:Nx-1) +...
+    Uz(1:Nx-1).*Uz(1:Nx-1)));
 
 
 % Run only at select iterations:
-if (mod ( grid.iter, 10) == 0)
+if (mod ( grid.iter, 5000) == 0)
     
     % Clear the figure
     clf()
     
     %Grab inital size:
-    Nx = grid.Nx;
     
     %Plot the vectorfield for Bx, By, Bz:
     x_bx = grid.x1;
@@ -67,7 +71,7 @@ if (mod ( grid.iter, 10) == 0)
     plot(x_ey,Jy)
     hold on
     plot(x_ez,Jz)
-    title("J-fields")
+    title("Current Density")
     xlabel("x [m]")
     ylabel("J [C/sm^2]")
     legend("Jx","Jy","Jz")
@@ -83,11 +87,23 @@ if (mod ( grid.iter, 10) == 0)
     xlabel("t [s]")
     ylabel("Energy [J]")
     legend("B-Field","E-Field","Total Field")
+
+    % Total ptcl/field energy partition
+    subplot(2,3,5)
+    plot(t_vec,grid.Total_Energy_field(1:grid.iter))
+    hold on
+    plot(t_vec,grid.Total_Energy_ptcls(1:grid.iter))
+    hold on
+    plot(t_vec,grid.Total_Energy_field(1:grid.iter)+grid.Total_Energy_ptcls(1:grid.iter))
+    title("Ptcl and Field Energy")
+    xlabel("t [s]")
+    ylabel("Energy [J]")
+    legend("Fields", "Particles","Total (Ptcls+Fields)")
     
     %Print that it runs:
     fprintf("Output for: iteration %d\n",grid.iter);
     
     %Pause and then clear figure
-    pause(0.001)
+    pause(0.01)
 end
 end

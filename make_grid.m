@@ -2,13 +2,13 @@ function grid = make_grid
 
 %%% Initialize memory %%%
 %Setup Grid: (Boundary Grid):
-grid.Nx = 200;
+grid.Nx = 1000;
 grid.xmin = 0;
-grid.xmax = grid.Nx;
-grid.dx = 1;
+grid.xmax = 0.1;
+grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
 grid.time = 0;
 grid.dt = 0.1;
-grid.t_max = 100;
+grid.t_max = 1;
 grid.NT = ceil(grid.t_max/grid.dt);
 
 %Constants
@@ -18,6 +18,13 @@ grid.eps_0 = 1;
 grid.iter = 1;
 grid.m0 = 1;
 grid.e0 = -1; %Electrons
+
+
+   grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
+    grid.time = 0;
+    grid.cfl = 0.98; %clf = udt/dx <= C_max
+    grid.dt = 0.98*grid.dx/grid.c;
+grid.NT = ceil(grid.t_max/grid.dt);
 
 
 %Restrict:
@@ -63,10 +70,17 @@ grid.x2 = interp_edge_to_center(grid.x1);
 grid.Total_Energy_E_field = zeros(1,grid.NT);
 grid.Total_Energy_B_field = zeros(1,grid.NT);
 grid.Total_Energy_field = zeros(1,grid.NT);
+grid.Total_Energy_ptcls = zeros(1,grid.NT);
 
 %BCs and ICs extensions
-grid.BC_cond = "Non_Periodic";
-grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer"; 
+%Standing Photon
+grid.BC_cond = "Perioidic";
+grid.BC_type = "Perioidic";
 grid.IC_type = grid.BC_type;
+
+%JE9: Cuttoff
+%grid.BC_cond = "Non_Periodic";
+%grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer"; 
+%grid.IC_type = grid.BC_type;
 
 end

@@ -36,7 +36,7 @@ if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
     grid.NT = ceil(grid.t_max/grid.dt);
 
     %Density
-    N = N + 1e17;
+    N = N*0.0 + 1e17;
 
     %New grids
     grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
@@ -56,13 +56,17 @@ end
 
 
 %Create a photon ( E only)
-%for i = (grid.Ey_i_0-1):grid.Ey_i_end
-%    Ey(i) = 1.0*sin(3*2*(pi)*(i-1)/(grid.Ey_i_end));
-%end
+if grid.BC_type == "Perioidic"
+    for i = (grid.Ey_i_0-1):grid.Ey_i_end
+        Ey(i) = 1.0*sin(3*2*(pi)*(i-1)/(grid.Ey_i_end));
+        N = N*0.0 + 1;
+    end
+end
 
 %Lastly Print Stability / Stats
 fprintf("Stability Requires: (cdt/dx) we have C = %1.3f of max 1.0\n",grid.c*grid.dt/grid.dx);
 fprintf("Grid: Nx: %d, NT: %d\n",grid.Nx,grid.NT);
 fprintf("Grid-Spacing: dx: %g, dT: %g\n",grid.dx,grid.dt);
+fprintf("Average: wp: %f\n",sqrt(grid.mu_0*grid.e0*grid.e0*mean(N)/(grid.m0)));
 
 end

@@ -32,6 +32,9 @@ Ux = zeros(1,Nx-1);
 Uy = zeros(1,Nx);
 Uz = zeros(1,Nx);
 N = zeros(1,Nx);
+Vx = zeros(1,Nx-1);
+Vy = zeros(1,Nx);
+Vz = zeros(1,Nx);
 
 
 %Stability limit
@@ -55,7 +58,7 @@ while(grid.time < grid.t_max)
     [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
     
     %Call i/o and diagnostics
-    grid = diagnostics(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,grid);
+    grid = diagnostics(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,Ux,Uy,Uz,N,grid);
     
     %Update the gridtime
     grid.time = grid.time + grid.dt;
@@ -64,9 +67,10 @@ while(grid.time < grid.t_max)
     grid.iter = grid.iter + 1;
 
     %Updated the fluid U (Need E and B both at n), U is on the half-grid
-    [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,N,grid);
-        [Ey,Ez,Uy,Uz,Jy,Jz] = BC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
+    [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
 
+    %Fix the BC of the current density:
+    [Uy,Uz,Vy,Vz] = BC_J(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vy,Vz,grid);
 
     %Deposit the Current
     [Jx,Jy,Jz] = J_deposition(N,Vx,Vy,Vz,grid);
