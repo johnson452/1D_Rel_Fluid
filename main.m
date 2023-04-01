@@ -8,6 +8,7 @@
 %-1D
 % Fluid Scheme: https://ammar-hakim.org/sj/hancock-muscl.html
 % E + (v x B) : H&C 
+% AST 560 Extra notes: https://ast560.readthedocs.io/en/latest/
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clc
@@ -34,13 +35,12 @@ N = zeros(1,Nx);
 
 
 %Stability limit
-fprintf("Stability Requires: (cdt/dx) we have C = %1.3f of max 1.0\n",grid.c*grid.dt/grid.dx);
 %%% Initialize memory end %%%
 
 
 %%% Main code: %%%
 %Initial Conditions (at n - 1)
-[Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz] = IC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
+[N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid] = IC(N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
 
 %Half push & Periodic Call (at n - 1/2)
 [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
@@ -51,7 +51,7 @@ figure('units','normalized','outerposition',[0 0 1 1])
 %%% Time loop %%%
 while(grid.time < grid.t_max)
     
-    %Advance B field (n-1/2 -> n)
+    %Advance B field (n-1/2 -> n) (E & B now both at n)
     [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
     
     %Call i/o and diagnostics
@@ -63,15 +63,17 @@ while(grid.time < grid.t_max)
     %Update the iterator
     grid.iter = grid.iter + 1;
 
-    %Updated the fluid U
-    [Ux,Uy,Uz,Vx,Vy,Vz] = Rel_Fluids_1D_u_only(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
-    
-    %Deposite Current
-    [Jx,Jy,Jz] = J_deposition(Vx,Vy,Vz,grid);
+    %Updated the fluid U (Need E and B both at n), U is on the half-grid
+    [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,N,grid);
+        [Ey,Ez,Uy,Uz,Jy,Jz] = BC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
+
+
+    %Deposit the Current
+    [Jx,Jy,Jz] = J_deposition(N,Vx,Vy,Vz,grid);
     
     %Advance E field (n-1 -> n) & Periodic Boundaries
     [Ex,Ey,Ez] = push_E(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,grid);
-    [Ex,Ey,Ez] = periodic_E(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,grid);
+    [Ey,Ez,Uy,Uz,Jy,Jz] = BC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
     
     %Advance B field (n -> n+1/2)
     [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);

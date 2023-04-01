@@ -21,14 +21,14 @@ if (mod ( grid.iter, 10) == 0)
     Nx = grid.Nx;
     
     %Plot the vectorfield for Bx, By, Bz:
-    x_bx = grid.Bx_i_offset + linspace(grid.Bx_i_0, grid.Bx_i_end, grid.Bx_i_end-grid.Bx_i_0+1);
-    x_by = grid.By_i_offset + linspace(grid.By_i_0, grid.By_i_end, grid.By_i_end-grid.By_i_0+1);
-    x_bz = grid.Bz_i_offset + linspace(grid.Bz_i_0, grid.Bz_i_end, grid.Bz_i_end-grid.Bz_i_0+1);
+    x_bx = grid.x1;
+    x_by = grid.x2;
+    x_bz = grid.x2;
     
     %Plot the vectorfield for Ex, Ey, Ez:
-    x_ex = grid.Ex_i_offset + linspace(grid.Ex_i_0, grid.Ex_i_end, grid.Ex_i_end-grid.Ex_i_0+1);
-    x_ey = grid.Ey_i_offset + linspace(grid.Ey_i_0-1, grid.Ey_i_end+1, grid.Ey_i_end-grid.Ey_i_0+3);
-    x_ez = grid.Ez_i_offset + linspace(grid.Ez_i_0-1, grid.Ez_i_end+1, grid.Ez_i_end-grid.Ez_i_0+3);
+    x_ex = grid.x2;
+    x_ey = grid.x1;
+    x_ez = grid.x1;
     
     %Time spacing:
     t_vec = linspace(0,grid.time,grid.iter);
