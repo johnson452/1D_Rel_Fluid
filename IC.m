@@ -32,7 +32,7 @@ if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
     grid.time = 0;
     grid.cfl = 0.98; %clf = udt/dx <= C_max
     grid.dt = 0.98*grid.dx/grid.c;
-    grid.t_max = 1.4e-9;
+    grid.t_max = 5e-8;
     grid.NT = ceil(grid.t_max/grid.dt);
 
     %Density
@@ -44,8 +44,16 @@ if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
 
     %Magnetic Field Profile
     x_Bz = grid.x2;
-    Bz = grid.B0 * (grid.R0+grid.xc)./(grid.R0+x_Bz);
+    grid.external_Bz = grid.B0 * (grid.R0+grid.xc)./(grid.R0+x_Bz);
 
+
+    % External quantities
+    grid.external_Bx = 0;
+    grid.external_By = 0;
+
+    grid.external_Ex = 0;
+    grid.external_Ey = 0;
+    grid.external_Ez = 0;
 end
 
 

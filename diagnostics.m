@@ -11,13 +11,13 @@ grid.Total_Energy_E_field(grid.iter) = (grid.eps_0/2) * ( sum(Ex.*Ex) +...
     sum(Ez(1:Nx-1).*Ez(1:Nx-1)) );
 grid.Total_Energy_B_field(grid.iter) = (1/(grid.mu_0*2)) * ( sum(Bx.*Bx) + sum(By.*By) + sum(Bz.*Bz) );
 grid.Total_Energy_field(grid.iter) = grid.Total_Energy_E_field(grid.iter)  + grid.Total_Energy_B_field(grid.iter);
-grid.Total_Energy_ptcls(grid.iter) = sum(grid.m0*N(1:Nx-1)*(0.5).* (Ux.*Ux +...
+grid.Total_Energy_ptcls(grid.iter) = grid.m0*grid.c*grid.c*sum(N(1:Nx-1).* sqrt(1 + (Ux.*Ux +...
     Uy(1:Nx-1).*Uy(1:Nx-1) +...
-    Uz(1:Nx-1).*Uz(1:Nx-1)));
+    Uz(1:Nx-1).*Uz(1:Nx-1)) - 1));
 
 
 % Run only at select iterations:
-if (mod ( grid.iter, 5000) == 0)
+if (mod ( grid.iter, 500) == 0)
     
     % Clear the figure
     clf()

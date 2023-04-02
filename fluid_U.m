@@ -13,6 +13,8 @@
 function [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid)
 
 % **** IMPORTANT ****
+[Bx,By,Bz,Ex,Ey,Ez] = external_fields(Bx,By,Bz,Ex,Ey,Ez,grid);
+
 %Interp all values to cell-centered quantities?
 Bx = interp_edge_to_center(Bx);
 Ey = interp_edge_to_center(Ey);
@@ -73,7 +75,7 @@ Vz = Uz./gamma_n_plus_1;
 %[  A   B   C   D  ] - Centered Values
 %    \ / \ / \ /
 %[P   X   Y   Z   P] - Edge Values
-% P = (A + D)/2 
+% P = 0 -> fix then calculated in BC_J
 Uy = interp_center_to_edge(Uy);
 Uz = interp_center_to_edge(Uz);
 Vy = interp_center_to_edge(Vy);

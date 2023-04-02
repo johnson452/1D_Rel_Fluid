@@ -70,7 +70,7 @@ while(grid.time < grid.t_max)
     [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
 
     %Fix the BC of the current density:
-    [Uy,Uz,Vy,Vz] = BC_J(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vy,Vz,grid);
+    [Uy,Uz,Vy,Vz] = BC_J(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
 
     %Deposit the Current
     [Jx,Jy,Jz] = J_deposition(N,Vx,Vy,Vz,grid);
