@@ -40,7 +40,8 @@ u_0_minus = Ux + E_0;
 u_1_minus = Uy + E_1;
 u_2_minus = Uz + E_2;
 
-u_star = u_0_minus.*(B_0/c) + u_1_minus.*(B_1/c) + u_2_minus.*(B_2/c);
+% (MAYBE ERRONEOUS? )u_star = u_0_minus.*(B_0/c) + u_1_minus.*(B_1/c) + u_2_minus.*(B_2/c);
+u_star = u_0_minus.*(B_0) + u_1_minus.*(B_1) + u_2_minus.*(B_2);
 gamma_minus = sqrt(1 + (u_0_minus.*u_0_minus + u_1_minus.*u_1_minus + u_2_minus.*u_2_minus)/(c*c));
 dot_tau_tau = (B_0.*B_0 + B_1.*B_1 + B_2.*B_2);
 sigma = gamma_minus.*gamma_minus - dot_tau_tau;

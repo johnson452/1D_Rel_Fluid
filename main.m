@@ -17,25 +17,7 @@ close all
 
 
 %Setup field arrays (See PPT)
-grid = make_grid();
-Nx = grid.Nx;
-Ex = zeros(1,Nx-1);
-Ey = zeros(1,Nx);
-Ez = zeros(1,Nx);
-Jx = zeros(1,Nx-1);
-Jy = zeros(1,Nx);
-Jz = zeros(1,Nx);
-Bx = zeros(1,Nx);
-By = zeros(1,Nx-1);
-Bz = zeros(1,Nx-1);
-Ux = zeros(1,Nx-1);
-Uy = zeros(1,Nx);
-Uz = zeros(1,Nx);
-N = zeros(1,Nx);
-Vx = zeros(1,Nx-1);
-Vy = zeros(1,Nx);
-Vz = zeros(1,Nx);
-
+[N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid();
 
 %Stability limit
 %%% Initialize memory end %%%
