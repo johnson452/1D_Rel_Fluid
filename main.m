@@ -30,6 +30,8 @@ close all
 %Half push & Periodic Call (at n - 1/2)
 [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
 
+%Half push U
+
 %Make the diagnostic Figure
 figure('units','normalized','outerposition',[0 0 1 1])
 
@@ -49,13 +51,13 @@ while(grid.time < grid.t_max)
     grid.iter = grid.iter + 1;
 
     %Updated the fluid U (Need E and B both at n), U is on the half-grid
-    [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
+    %[Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
 
     %Fix the BC of the current density:
-    [Uy,Uz,Vy,Vz] = BC_J(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
+    %[Uy,Uz,Vy,Vz] = BC_J(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
 
     %Deposit the Current
-    [Jx,Jy,Jz] = J_deposition(N,Vx,Vy,Vz,grid);
+    %[Jx,Jy,Jz] = J_deposition(N,Vx,Vy,Vz,grid);
     
     %Advance E field (n-1 -> n) & Periodic Boundaries
     [Ex,Ey,Ez] = push_E(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,grid);

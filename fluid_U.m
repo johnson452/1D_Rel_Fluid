@@ -10,9 +10,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Update the quanitites Ux, Uy, Uz (t -> t + dt)
-function [Ux,Uy,Uz,Vx,Vy,Vz] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid)
+function [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid)
 
 % **** IMPORTANT ****
+
+%For periodic BC we need to save the extra edge pieces
+if grid.Nx == max(size(Ey))
+    grid = save_old_edges(Uy,Uz,grid);
+end
+
+%External Fields if applied
 [Bx,By,Bz,Ex,Ey,Ez] = external_fields(Bx,By,Bz,Ex,Ey,Ez,grid);
 
 %Interp all values to cell-centered quantities?
@@ -71,7 +78,7 @@ Vx = Ux./gamma_n_plus_1;
 Vy = Uy./gamma_n_plus_1;
 Vz = Uz./gamma_n_plus_1;
 
-%Interpolate Back 
+%Interpolate Back
 % interp_center_to_edge() Procedure
 %[  A   B   C   D  ] - Centered Values
 %    \ / \ / \ /

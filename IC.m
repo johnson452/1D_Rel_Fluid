@@ -70,7 +70,7 @@ if grid.BC_type == "Periodic"
     % Frequency (omega = C_frac*wp)
     N = N*0.0 + 1;
     wp = sqrt(grid.mu_0*grid.e0*grid.e0*mean(N)/(grid.m0));
-    omega_o_wave = 50.0* wp;
+    omega_o_wave = 5.0* wp;
 
 
     % Phase error
@@ -79,6 +79,7 @@ if grid.BC_type == "Periodic"
     k = real(k_bar);
     ik = imag(k_bar);
     K = sqrt(k^2 + ik^2);
+    grid.ik = ik;
 
     %Redo the spatial grid:
     grid.lambda = 2*pi/K;
@@ -96,11 +97,12 @@ if grid.BC_type == "Periodic"
     grid.x2 = interp_edge_to_center(grid.x1);
 
     % E and B
-    E0 = 1.0;
+    E0 = 1.0e-4;
     Ey = E0*sin(2*K*grid.x1/L);
     Bz = (E0*K/omega_o_wave)*sin(2*K*grid.x2/L+phase);
 
     %Initial Vy, Uy for current density with specified N
+    if (0)
     Bz_interp = interp_center_to_edge(Bz);
     Vy = (1/(mean(N)*grid.mu_0*grid.e0))*( ...
         (1/grid.c^2)*(Ey*omega_o_wave) - ...
@@ -111,6 +113,7 @@ if grid.BC_type == "Periodic"
     end
     gamma = 1./sqrt(1-Vy.*Vy/(grid.c^2));
     Uy = gamma.*Vy;
+    end
 end
 
 %Lastly Print Stability / Stats
