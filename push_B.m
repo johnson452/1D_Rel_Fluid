@@ -1,4 +1,4 @@
-%Advance B field NOTE: halfpush 
+%Advance B field NOTE: halfpush
 function [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid)
 
 %Retrieve Constants:

@@ -10,7 +10,7 @@ grid.time = 0;
 grid.dt = 0.1;
 grid.t_max = 1000;
 grid.NT = ceil(grid.t_max/grid.dt);
-grid.Output_interval = 100;
+grid.Output_interval = 1;
 
 %Constants
 grid.c = 1;
@@ -91,11 +91,11 @@ Vy = zeros(1,Nx);
 Vz = zeros(1,Nx);
 
 %BCs and ICs extensions
-%Standing Photon
- grid.BC_cond = "Perioidic";
- grid.BC_type = "Perioidic";
- grid.IC_type = grid.BC_type;
- grid.problem_name = "Periodic_Photon";
+%Standing Photon grid.BC_cond == "Periodic"
+grid.BC_cond = "Periodic";
+grid.BC_type = "Periodic";
+grid.IC_type = grid.BC_type;
+grid.problem_name = "Periodic_Photon";
 
 %JE9: Cuttoff
 %Turn on options: i.e. If there are externally applied fields, based on 

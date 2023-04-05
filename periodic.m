@@ -1,5 +1,5 @@
 %Boundary conditions E
-function [Bx, Ey,Ez,Uy,Uz,Jy,Jz] = periodic(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid)
+function [Bx,Ey,Ez,Uy,Uz,Jy,Jz] = periodic(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid)
 %Retrieve Constants:
 dt = grid.dt;
 dx = grid.dx;

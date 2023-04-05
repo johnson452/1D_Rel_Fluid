@@ -64,11 +64,53 @@ end
 
 
 %Create a photon ( E only)
-if grid.BC_type == "Perioidic"
-    for i = (grid.Ey_i_0-1):grid.Ey_i_end
-        Ey(i) = 1.0*sin(3*2*(pi)*(i-1)/(grid.Ey_i_end));
-        N = N*0.0 + 1;
+L = (grid.xmax - grid.xmin);
+if grid.BC_type == "Periodic"
+
+    % Frequency (omega = C_frac*wp)
+    N = N*0.0 + 1;
+    wp = sqrt(grid.mu_0*grid.e0*grid.e0*mean(N)/(grid.m0));
+    omega_o_wave = 50.0* wp;
+
+
+    % Phase error
+    k_bar = (1/grid.c)*sqrt(omega_o_wave^2 - wp^2);
+    phase = atan(imag(k_bar)/real(k_bar));
+    k = real(k_bar);
+    ik = imag(k_bar);
+    K = sqrt(k^2 + ik^2);
+
+    %Redo the spatial grid:
+    grid.lambda = 2*pi/K;
+    grid.xmax = 3*grid.lambda;
+    grid.xmin = 0.0;
+    grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
+    grid.time = 0;
+    grid.cfl = 0.98; %clf = udt/dx <= C_max
+    grid.dt = 0.98*grid.dx/grid.c;
+    grid.t_max = 1000*( 1/(omega_o_wave/(2*pi)) );
+    grid.NT = ceil(grid.t_max/grid.dt);
+
+    %New grids
+    grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
+    grid.x2 = interp_edge_to_center(grid.x1);
+
+    % E and B
+    E0 = 1.0;
+    Ey = E0*sin(2*K*grid.x1/L);
+    Bz = (E0*K/omega_o_wave)*sin(2*K*grid.x2/L+phase);
+
+    %Initial Vy, Uy for current density with specified N
+    Bz_interp = interp_center_to_edge(Bz);
+    Vy = (1/(mean(N)*grid.mu_0*grid.e0))*( ...
+        (1/grid.c^2)*(Ey*omega_o_wave) - ...
+        (Bz_interp * k) );
+    if max(Vy)/grid.c > 1 
+        fprintf("Invalid IC\n");
+        pause(1000)
     end
+    gamma = 1./sqrt(1-Vy.*Vy/(grid.c^2));
+    Uy = gamma.*Vy;
 end
 
 %Lastly Print Stability / Stats

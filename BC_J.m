@@ -52,8 +52,8 @@ if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
     Vy(N_max) = Vy(N_max-1);
     Vz(N_max) = Vz(N_max-1);
 
-    Vy(N_max) = (1/(N(N_max)*grid.e0))*J0*sin(2*pi*fd*t)*sin(0.5*pi*min(1,t/t0))^2;
-    gamma = (1/sqrt(1 - ( Vx(N_max-1)*Vx(N_max-1)/4 + Vy(N_max)*Vy(N_max) + Vz(N_max)*Vz(N_max)  )/(grid.c*grid.c))) ;
+    Vy(N_max) = 3*(1/(N(N_max)*grid.e0))*J0*sin(2*pi*fd*t)*sin(0.5*pi*min(1,t/t0))^2;
+    gamma = (1/sqrt(1 - ( Vx(N_max-1)*Vx(N_max-1) + Vy(N_max)*Vy(N_max) + Vz(N_max)*Vz(N_max)  )/(grid.c*grid.c))) ;
     Uy(N_max) = Vy(N_max)*gamma;
 end
 
