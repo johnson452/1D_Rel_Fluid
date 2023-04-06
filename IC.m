@@ -70,7 +70,7 @@ if grid.BC_type == "Periodic"
     % Frequency (omega = C_frac*wp)
     N = N*0.0 + 1;
     wp = sqrt(grid.mu_0*grid.e0*grid.e0*mean(N)/(grid.m0));
-    omega_o_wave = 5.0* wp;
+    omega_o_wave = 10.0* wp;
 
 
     % Phase error
@@ -97,7 +97,7 @@ if grid.BC_type == "Periodic"
     grid.x2 = interp_edge_to_center(grid.x1);
 
     % E and B
-    E0 = 1.0e-4;
+    E0 = 1.0;
     Ey = E0*sin(2*K*grid.x1/L);
     Bz = (E0*K/omega_o_wave)*sin(2*K*grid.x2/L+phase);
 
