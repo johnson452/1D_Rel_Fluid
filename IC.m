@@ -67,10 +67,18 @@ end
 L = (grid.xmax - grid.xmin);
 if grid.BC_type == "Periodic"
 
+    %Constants
+    grid.mu_0 = 4*pi*1e-7;
+    grid.eps_0 = 8.85418781762039e-12;
+    grid.c = sqrt(1/(grid.mu_0*grid.eps_0));
+    grid.iter = 1;
+    grid.m0 = 9.1093837e-31; %Electrons
+    grid.e0 = -1.60217663e-19; %Electrons
+
     % Frequency (omega = C_frac*wp)
-    N = N*0.0 + 1;
-    wp = sqrt(grid.mu_0*grid.e0*grid.e0*mean(N)/(grid.m0));
-    omega_o_wave = 10.0* wp;
+    N = N*0.0 + 1e13; %1e13
+    wp = sqrt(grid.e0*grid.e0*mean(N)/(grid.eps_0*grid.m0));
+    omega_o_wave = 2.0* wp;
 
 
     % Phase error
@@ -89,7 +97,7 @@ if grid.BC_type == "Periodic"
     grid.time = 0;
     grid.cfl = 0.98; %clf = udt/dx <= C_max
     grid.dt = 0.98*grid.dx/grid.c;
-    grid.t_max = 1000*( 1/(omega_o_wave/(2*pi)) );
+    grid.t_max = 20; % 100*( 1/(omega_o_wave/(2*pi)) );
     grid.NT = ceil(grid.t_max/grid.dt);
 
     %New grids
@@ -98,8 +106,8 @@ if grid.BC_type == "Periodic"
 
     % E and B
     E0 = 1.0;
-    Ey = E0*sin(2*K*grid.x1/L);
-    Bz = (E0*K/omega_o_wave)*sin(2*K*grid.x2/L+phase);
+    Ey = E0*sin(K*grid.x1/L);
+    Bz = (E0*K/omega_o_wave)*sin(K*grid.x2/L+phase);
 
     %Initial Vy, Uy for current density with specified N
     if (0)

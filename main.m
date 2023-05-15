@@ -27,19 +27,11 @@ close all
 %Initial Conditions (at n - 1)
 [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid] = IC(N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
 
-%Half push & Periodic Call (at n - 1/2)
-[Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
-
-%Half push U
-
 %Make the diagnostic Figure
 figure('units','normalized','outerposition',[0 0 1 1])
 
 %%% Time loop %%%
 while(grid.time < grid.t_max)
-    
-    %Advance B field (n-1/2 -> n) (E & B now both at n)
-    [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
     
     %Call i/o and diagnostics
     grid = diagnostics(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,Ux,Uy,Uz,N,grid);
@@ -55,19 +47,22 @@ while(grid.time < grid.t_max)
     %N = BC_N(N,Vx,Vy,Vz,grid);
 
     %Updated the fluid U (Need E and B both at n), U is on the half-grid
-    [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
-
+    %Yeilds U at n - 1/2
     %Fix the BC of the current density:
+    [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
     [Uy,Uz,Vy,Vz] = BC_J(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
 
-    %Deposit the Current (time n + 1/2)
+    %Advance B field (n - 1 -> n - 1/2) using E|n-1
+    [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
+
+    %Deposit the Current (time n - 1/2)
     [Jx,Jy,Jz] = J_deposition(N,Vx,Vy,Vz,grid);
     
-    %Advance E field (n-1 -> n) & Periodic Boundaries
+    %Advance E field (n-1 -> n) & Periodic Boundaries, needs B, J|n - 1/2
     [Ex,Ey,Ez] = push_E(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,grid);
     [Ey,Ez,Uy,Uz,Jy,Jz] = BC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
     
-    %Advance B field (n -> n+1/2)
+    %Advance B field (n - 1/2 -> n)
     [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
     
 end

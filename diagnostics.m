@@ -7,7 +7,7 @@ grid = energy_momentum_diagnostic(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,Ux,Uy,Uz,N,str,grid
 
 
 % Run only at select iterations:
-if (mod ( grid.iter, grid.Output_interval ) == 0)
+if (mod ( grid.iter, grid.Output_interval ) == 0 || grid.iter == grid.NT)
 
     % Clear the figure
     clf()

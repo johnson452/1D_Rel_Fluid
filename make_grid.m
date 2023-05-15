@@ -2,15 +2,15 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid
 
 %%% Initialize memory %%%
 %Setup Grid: (Boundary Grid):
-grid.Nx = 200;
+grid.Nx = 100;
 grid.xmin = 0;
 grid.xmax = 1.0;
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
 grid.time = 0;
 grid.dt = 0.1;
-grid.t_max = 1000;
+grid.t_max = 200;
 grid.NT = ceil(grid.t_max/grid.dt);
-grid.Output_interval = 1000;
+grid.Output_interval = 100;
 
 %Constants
 grid.c = 1;
