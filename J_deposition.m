@@ -10,7 +10,7 @@ function [Jx,Jy,Jz] = J_deposition(N,Vx,Vy,Vz,grid)
 %Jy(Nx_half) = 3.0* sin(grid.time/30);
 
 %Interpolate the quantity
-N_CC = interp_edge_to_center(N);
+N_CC = interp_edge_to_center(N,grid);
 
 %Fluid J, Recall N0 (original) = Num (1/L0) where length 
 %transforms like L(gamma) = L0, so Num(lab)/gamma_trans = N0/gamma_origin

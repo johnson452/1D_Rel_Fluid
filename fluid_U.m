@@ -14,20 +14,15 @@ function [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid)
 
 % **** IMPORTANT ****
 
-%For periodic BC we need to save the extra edge pieces
-if grid.Nx == max(size(Ey))
-    grid = save_old_edges(Uy,Uz,grid);
-end
-
 %External Fields if applied
 [Bx,By,Bz,Ex,Ey,Ez] = external_fields(Bx,By,Bz,Ex,Ey,Ez,grid);
 
 %Interp all values to cell-centered quantities?
-Bx = interp_edge_to_center(Bx);
-Ey = interp_edge_to_center(Ey);
-Ez = interp_edge_to_center(Ez);
-Uy = interp_edge_to_center(Uy);
-Uz = interp_edge_to_center(Uz);
+Bx = interp_edge_to_center(Bx,grid);
+Ey = interp_edge_to_center(Ey,grid);
+Ez = interp_edge_to_center(Ez,grid);
+Uy = interp_edge_to_center(Uy,grid);
+Uz = interp_edge_to_center(Uz,grid);
 % **** IMPORTANT ****
 
 %%% H&C Algro %%%
@@ -84,10 +79,10 @@ Vz = Uz./gamma_n_plus_1;
 %    \ / \ / \ /
 %[P   X   Y   Z   P] - Edge Values
 % P = 0 -> fix then calculated in BC_J
-Uy = interp_center_to_edge(Uy);
-Uz = interp_center_to_edge(Uz);
-Vy = interp_center_to_edge(Vy);
-Vz = interp_center_to_edge(Vz);
+Uy = interp_center_to_edge(Uy,grid);
+Uz = interp_center_to_edge(Uz,grid);
+Vy = interp_center_to_edge(Vy,grid);
+Vz = interp_center_to_edge(Vz,grid);
 
 
 
