@@ -9,11 +9,11 @@ function [y_interp] = interp_center_to_edge(y)
 
 % Pad y with perioid conditions
 NX = max(size(y));
-y = [y(NX),y,y(1)];
+y = [y(NX-1),y(NX),y,y(1),y(2)];
 Nx = max(size(y));
 x = linspace(0,1,Nx);
 dx = x(2)-x(1);
-x2 = linspace(0+dx/2,1-dx/2,Nx-1);
+x2 = linspace(0+3*dx/2,1-3*dx/2,Nx-3);
 y_interp = interp1(x,y,x2,'spline');
 
 

@@ -1,8 +1,8 @@
 function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid
 
 %%% Initialize memory %%%
-%Setup Grid: (Boundary Grid):
-grid.Nx = 100;
+%[DEFAULT] Setup Grid: (Boundary Grid):
+grid.Nx = 1000; % Only specified here 
 grid.xmin = 0;
 grid.xmax = 1.0;
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
@@ -10,9 +10,9 @@ grid.time = 0;
 grid.dt = 0.1;
 grid.t_max = 200;
 grid.NT = ceil(grid.t_max/grid.dt);
-grid.Output_interval = 100;
+grid.Output_interval = 1000;
 
-%Constants
+%[DEFAULT] Constants, updated in IC.m
 grid.c = 1;
 grid.mu_0 = 1;
 grid.eps_0 = 1;
@@ -20,7 +20,7 @@ grid.iter = 1;
 grid.m0 = 1;
 grid.e0 = -1; %Electrons
 
-
+%[DEFAULT] Grids, updated in IC.m
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
 grid.time = 0;
 grid.cfl = 0.98; %clf = udt/dx <= C_max
@@ -58,7 +58,7 @@ grid.external_fields = "Specified";
 % 1: Bx, Ey, Ez, U.. J.. V..
 % 1: Ex. By, Bz
 grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
-grid.x2 = interp_edge_to_center(grid.x1);
+grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
 
 
 %Total Energy
@@ -91,7 +91,6 @@ Vy = zeros(1,Nx);
 Vz = zeros(1,Nx);
 
 %BCs and ICs extensions
-%Standing Photon grid.BC_cond == "Periodic"
 grid.BC_cond = "Periodic";
 grid.BC_type = "Periodic";
 grid.IC_type = grid.BC_type;
@@ -100,10 +99,10 @@ grid.problem_name = "Periodic_Photon";
 %JE9: Cuttoff
 %Turn on options: i.e. If there are externally applied fields, based on 
 %the name
-%grid.problem_name = "JE9";
-%grid.BC_cond = "Non_Periodic";
-%grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer";
-%grid.IC_type = grid.BC_type;
+% grid.problem_name = "JE9";
+% grid.BC_cond = "Non_Periodic";
+% grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer";
+% grid.IC_type = grid.BC_type;
 
 
 %Make the file/ delete if already exists:

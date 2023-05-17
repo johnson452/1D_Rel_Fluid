@@ -28,7 +28,7 @@ close all
 [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid] = IC(N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
 
 %Make the diagnostic Figure
-figure('units','normalized','outerposition',[0 0 1 1])
+figure('units','normalized','outerposition',[0 0 0.5 0.5])
 
 %%% Time loop %%%
 while(grid.time < grid.t_max)

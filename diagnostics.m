@@ -94,11 +94,11 @@ if (mod ( grid.iter, grid.Output_interval ) == 0 || grid.iter == grid.NT)
     legend("Fields", "Particles","Total (Ptcls+Fields)")
 
     % Number density evolution:
-    subplot(2,3,6)
-    plot(grid.x1,N)
-    title("Density")
-    xlabel("x [m]")
-    ylabel("Density [N]")
+%     subplot(2,3,6)
+%     plot(grid.x1,N)
+%     title("Density")
+%     xlabel("x [m]")
+%     ylabel("Density [N]")
     %legend("Fields", "Particles","Total (Ptcls+Fields)")
 
     %Print that it runs:

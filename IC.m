@@ -40,7 +40,7 @@ if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
 
     %New grids
     grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
-    grid.x2 = interp_edge_to_center(grid.x1);
+    grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
 
     %Magnetic Field Profile
     x_Bz = grid.x2;
@@ -76,9 +76,10 @@ if grid.BC_type == "Periodic"
     grid.e0 = -1.60217663e-19; %Electrons
 
     % Frequency (omega = C_frac*wp)
-    N = N*0.0 + 1e13; %1e13
+    N = N*0.0 + 1e17; %1e13
     wp = sqrt(grid.e0*grid.e0*mean(N)/(grid.eps_0*grid.m0));
     omega_o_wave = 2.0* wp;
+    grid.wp = wp;
 
 
     % Phase error
@@ -97,12 +98,12 @@ if grid.BC_type == "Periodic"
     grid.time = 0;
     grid.cfl = 0.98; %clf = udt/dx <= C_max
     grid.dt = 0.98*grid.dx/grid.c;
-    grid.t_max = 20; % 100*( 1/(omega_o_wave/(2*pi)) );
+    grid.t_max = 1000*( 1/(omega_o_wave/(2*pi)) );
     grid.NT = ceil(grid.t_max/grid.dt);
 
     %New grids
     grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
-    grid.x2 = interp_edge_to_center(grid.x1);
+    grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
 
     % E and B
     E0 = 1.0;
