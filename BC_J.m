@@ -1,7 +1,4 @@
-function [Uy,Uz,Vy,Vz] = BC_J(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,N,grid)
-
-%Grab the full gridsize
-Nx = grid.Nx;
+function [Uy,Uz,Vy,Vz] = BC_J(Uy,Uz,Vx,Vy,Vz,N,grid)
 
 if grid.BC_type == "Periodic"
     %Handled by Interpolations
@@ -9,7 +6,7 @@ if grid.BC_type == "Periodic"
 end
 
 if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
-    N_max = max(size(Jy));
+    N_max = max(size(Uy));
     J0 = grid.J0;
     fd = grid.fd;
     t = grid.time;

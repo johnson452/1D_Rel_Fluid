@@ -48,8 +48,10 @@ while(grid.time < grid.t_max)
   
     %Push U (n - 3/2 -> n - 1/2 (Need E and B both at n), U is on the half-grid
     [Ux,Uy,Uz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid);
+    [Uy,Uz,~,~] = BC_J(Uy,Uz,Vx,Vy,Vz,N,grid);
+     N = BC_N(N,Vx,Vy,Vz,grid);
     [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_source_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
-    [Uy,Uz,Vy,Vz] = BC_J(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
+    [Uy,Uz,Vy,Vz] = BC_J(Uy,Uz,Vx,Vy,Vz,N,grid);
 
     %Advance B field (n - 1 -> n - 1/2) using E|n-1
     [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);

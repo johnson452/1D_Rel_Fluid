@@ -91,18 +91,18 @@ Vy = zeros(1,Nx);
 Vz = zeros(1,Nx);
 
 %BCs and ICs extensions
-grid.BC_cond = "Periodic";
-grid.BC_type = "Periodic";
-grid.IC_type = grid.BC_type;
-grid.problem_name = "Periodic_Photon";
+% grid.BC_cond = "Periodic";
+% grid.BC_type = "Periodic";
+% grid.IC_type = grid.BC_type;
+% grid.problem_name = "Periodic_Photon";
 
 %JE9: Cuttoff
 %Turn on options: i.e. If there are externally applied fields, based on 
 %the name
-% grid.problem_name = "JE9";
-% grid.BC_cond = "Non_Periodic";
-% grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer";
-% grid.IC_type = grid.BC_type;
+grid.problem_name = "JE9";
+grid.BC_cond = "Non_Periodic";
+grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer";
+grid.IC_type = grid.BC_type;
 
 
 %Make the file/ delete if already exists:

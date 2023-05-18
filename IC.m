@@ -37,6 +37,7 @@ if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
 
     %Density
     N = N*0.0 + 1e17;
+    grid.N0 = N(1);
 
     %New grids
     grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
@@ -80,6 +81,7 @@ if grid.BC_type == "Periodic"
     wp = sqrt(grid.e0*grid.e0*mean(N)/(grid.eps_0*grid.m0));
     omega_o_wave = 2.0* wp;
     grid.wp = wp;
+    grid.N0 = N(1);
 
 
     % Phase error
