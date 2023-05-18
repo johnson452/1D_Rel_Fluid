@@ -10,7 +10,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Update the quanitites Ux, Uy, Uz (t -> t + dt)
-function [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid)
+function [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_source_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid)
 
 % **** IMPORTANT ****
 
