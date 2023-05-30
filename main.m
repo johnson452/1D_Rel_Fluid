@@ -41,10 +41,6 @@ while(grid.time < grid.t_max)
     
     %Update the iterator
     grid.iter = grid.iter + 1;
-
-    % Push N  (n - 1 -> n), apply BC
-    %[N,grid] = push_N(N,Vx,Vy,Vz,grid);
-    %N = BC_N(N,Vx,Vy,Vz,grid);
   
     %Push U (n - 3/2 -> n - 1/2 (Need E and B both at n), U is on the half-grid
     [Ux,Uy,Uz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid);
@@ -61,7 +57,7 @@ while(grid.time < grid.t_max)
     
     %Advance E field (n-1 -> n) & Periodic Boundaries, needs B, J|n - 1/2
     [Ex,Ey,Ez] = push_E(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,grid);
-    [Ey,Ez,Uy,Uz,Jy,Jz] = BC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
+    [Ex,Ey,Ez,Bx,By,Bz,Uy,Uz,Jy,Jz] = BC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
     
     %Advance B field (n - 1/2 -> n)
     [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);

@@ -70,7 +70,7 @@ Q_N = Q_N - grid.dt/(grid.dx)*(F_N_plus - F_N_minus);
 Ux = Ux';
 Uy = Uy';
 Uz = Uz';
-N = Q_N;
+N = Q_N';
 
 % Interpolate back
 Uy = interp_center_to_edge(Uy,grid);

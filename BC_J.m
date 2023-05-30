@@ -6,25 +6,59 @@ if grid.BC_type == "Periodic"
 end
 
 if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
-    N_max = max(size(Uy));
+    Nx = grid.Nx;
     J0 = grid.J0;
     fd = grid.fd;
     t = grid.time;
     t0 = grid.t0;
 
+    %Current at the boundary
+    Vx_temp = interp_center_to_edge(Vx,grid);
+    Vy(Nx-1) = 3*(1/(N(Nx-1)*grid.e0))*J0*sin(2*pi*fd*t)*sin(0.5*pi*min(1,t/t0))^2;
+    gamma = (1/sqrt(1 - ( Vx_temp(Nx-1)*Vx_temp(Nx-1) + Vy(Nx-1)*Vy(Nx-1) + Vz(Nx-1)*Vz(Nx-1)  )/(grid.c*grid.c))) ;
+    Uy(Nx-1) = Vy(Nx-1)*gamma;
+
+    %Copy Booundaries
     Uy(1) = Uy(2);
     Uz(1) = Uz(2);
     Vy(1) = Vy(2);
     Vz(1) = Vz(2);
 
-    Uy(N_max) = 0; %Uy(N_max-1);
-    Uz(N_max) = 0; %Uz(N_max-1);
-    Vy(N_max) = 0; %Vy(N_max-1);
-    Vz(N_max) = 0; %Vz(N_max-1);
+    Uy(Nx) = Uy(Nx-1);
+    Uz(Nx) = Uz(Nx-1);
+    Vy(Nx) = Vy(Nx-1);
+    Vz(Nx) = Vz(Nx-1);
 
-    Vy(N_max) = 3*(1/(N(N_max)*grid.e0))*J0*sin(2*pi*fd*t)*sin(0.5*pi*min(1,t/t0))^2;
-    gamma = (1/sqrt(1 - ( Vx(N_max-1)*Vx(N_max-1) + Vy(N_max)*Vy(N_max) + Vz(N_max)*Vz(N_max)  )/(grid.c*grid.c))) ;
-    Uy(N_max) = Vy(N_max)*gamma;
+
+end
+
+
+if grid.BC_type == "Propagation into a plasma wave beach"
+    Nx = grid.Nx;
+    J0 = grid.J0;
+    omega = grid.omega;
+    t = grid.time;
+
+    %Current at the boundary
+    Vx_temp = interp_center_to_edge(Vx,grid);
+    Vy(Nx-1) = (1/100)*(1/(N(Nx-1)*grid.e0))*J0*sin(omega*t);
+    gamma = (1/sqrt(1 - ( Vx_temp(Nx-1)*Vx_temp(Nx-1) + Vy(Nx-1)*Vy(Nx-1) + Vz(Nx-1)*Vz(Nx-1)  )/(grid.c*grid.c))) ;
+    Uy(Nx-1) = Vy(Nx-1)*gamma;
+    if abs(Vy(Nx-1)/grid.c) > 1
+    fprintf("Vy(Nx-1)/c < 1 --> (%f) < 1\n",Vy(Nx-1)/grid.c);
+    end
+
+    %Copy Booundaries
+    Uy(1) = Uy(2);
+    Uz(1) = Uz(2);
+    Vy(1) = Vy(2);
+    Vz(1) = Vz(2);
+
+    Uy(Nx) = Uy(Nx-1);
+    Uz(Nx) = Uz(Nx-1);
+    Vy(Nx) = Vy(Nx-1);
+    Vz(Nx) = Vz(Nx-1);
+
 end
 
 end
