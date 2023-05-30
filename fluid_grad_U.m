@@ -211,16 +211,16 @@ end
 
 
 % Function A(Q)
-function [AQ] = AQ(Qi,Ni,problem)
+function [AQ] = AQ(Q,N,problem)
 
 % Compute A(Q^n), can be vectors, for dt(UN), (matrix?)
 if problem == "fluid"
-    AQ = 2*(Qi(1)/N)*(1/sqrt(1+(Qi(1)^2 + Qi(2)^2 + Qi(3)^2)/(Ni^2))) + ...
-        - ((Qi(1)/N)^3)*(1/sqrt(1+(Qi(1)^2 + Qi(2)^2 + Qi(3)^2)/(Ni^2)));
+    AQ = 2*(Q(1)/N)*(1/sqrt(1+(Q(1)^2 + Q(2)^2 + Q(3)^2)/(N^2))) + ...
+        - ((Q(1)/N)^3)*(1/sqrt(1+(Q(1)^2 + Q(2)^2 + Q(3)^2)/(N^2)));
     % Compute A(Q^n), can be vectors, for dt(N)
 elseif problem == "density"
     % Note Qi = U here:
-    AQ =  (Qi(:,1)).*(1./sqrt(1+(Qi(:,1).^2 + Qi(:,2).^2 + Qi(:,3).^2)));
+    AQ =  (Q(:,1)).*(1./sqrt(1+(Q(:,1).^2 + Q(:,2).^2 + Q(:,3).^2)));
 else
     fprintf("A(Q) Not Found! \n");
     exit();

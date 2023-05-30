@@ -41,7 +41,7 @@ if grid.BC_type == "Propagation into a plasma wave beach"
 
     %Current at the boundary
     Vx_temp = interp_center_to_edge(Vx,grid);
-    Vy(Nx-1) = (1/100)*(1/(N(Nx-1)*grid.e0))*J0*sin(omega*t);
+    Vy(Nx-1) = (1/1e10)*(1/(N(Nx-1)*grid.e0))*J0*sin(omega*t);
     gamma = (1/sqrt(1 - ( Vx_temp(Nx-1)*Vx_temp(Nx-1) + Vy(Nx-1)*Vy(Nx-1) + Vz(Nx-1)*Vz(Nx-1)  )/(grid.c*grid.c))) ;
     Uy(Nx-1) = Vy(Nx-1)*gamma;
     if abs(Vy(Nx-1)/grid.c) > 1

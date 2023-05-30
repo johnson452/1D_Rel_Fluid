@@ -2,7 +2,7 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid
 
 %%% Initialize memory %%%
 %[DEFAULT] Setup Grid: (Boundary Grid):
-grid.Nx = 200; % Only specified here 
+grid.Nx = 2000; % Only specified here 
 grid.xmin = 0;
 grid.xmax = 1.0;
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
@@ -10,7 +10,7 @@ grid.time = 0;
 grid.dt = 0.1;
 grid.t_max = 200;
 grid.NT = ceil(grid.t_max/grid.dt);
-grid.Output_interval = 10;
+grid.Output_interval = 2000;
 
 %[DEFAULT] Constants, updated in IC.m
 grid.c = 1;
@@ -99,17 +99,17 @@ Vz = zeros(1,Nx);
 %JE9: Cuttoff EC
 %Turn on options: i.e. If there are externally applied fields, based on 
 %the name
-% grid.problem_name = "JE9";
-% grid.BC_cond = "Non_Periodic";
-% grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer";
-% grid.IC_type = grid.BC_type;
+grid.problem_name = "JE9";
+grid.BC_cond = "Non_Periodic";
+grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer";
+grid.IC_type = grid.BC_type;
 
 
 %JE8: Cuttoff Plasma Wave beach
-grid.problem_name = "JE8";
-grid.BC_cond = "Non_Periodic";
-grid.BC_type = "Propagation into a plasma wave beach";
-grid.IC_type = grid.BC_type;
+% grid.problem_name = "JE8";
+% grid.BC_cond = "Non_Periodic";
+% grid.BC_type = "Propagation into a plasma wave beach";
+% grid.IC_type = grid.BC_type;
 
 %Make the file/ delete if already exists:
 grid.filename = "Output/out.txt";
