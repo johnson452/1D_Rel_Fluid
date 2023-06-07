@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Name: Grant Johnson
-%Date: 5/17/2022
+%Date: 5/17/2023
 %Fluid algroithm, V (divergence U)
 
 %Notes:
@@ -17,60 +17,48 @@ Uy = interp_edge_to_center(Uy,grid);
 Uz = interp_edge_to_center(Uz,grid);
 N = interp_edge_to_center(N,grid);
 
-
-% Build U
-U = [Ux', Uy', Uz'];
-N = N';
+% Build Q
+Q = construct(N, Ux, Uy, Uz);
 Nx = grid.Nx;
+
 
 %Iterate over the domain
 % I = linspace(1,Nx-1,Nx-1); %DEFAULT
 R = mod( linspace(1,Nx-1,Nx-1), Nx-1) + 1;
 L = mod( linspace(-1,Nx-3,Nx-1), Nx-1) + 1;
-% R2 = mod( linspace(1,Nx,Nx), Nx) + 1;
-% L2 = mod( linspace(-1,Nx-2,Nx), Nx) + 1;
 
 %Reconstruct U(x) (soln) within one cell, also slope dU
-[~,dU] = reconstruct(U,U(L,:),U(R,:),0,grid.x2,grid.dx);
-[~,dN] = reconstruct(N,N(L),N(R),0,grid.x2,grid.dx);
+dQ = reconstruct(Q,Q(:,L),Q(:,R));
 
 %Update solution, primative variables
-U_tilde = U - grid.dt/(2*grid.dx)*Aprim(U,N,"fluid").*dU;
-N_tilde = N - grid.dt/(2*grid.dx)*AQ(U,N,"density").*dN;
+%Q_tilde = Q - grid.dt/(2*grid.dx)*AQ(Q,grid).*dQ;
+A = AQ(Q,grid);
+Q_tilde = zeros(4,grid.Nx-1);
+for i = 1:Nx-1
+    Q_tilde(:,i) = Q(:,i) - grid.dt/(2*grid.dx)*A(:,:,i)*dQ(:,i);
+end
 
-
-%Build Q: (it's a vector) [NUx, NUy, NUz]
-Q_NU_tilde = construct_UN(N,U_tilde);
-Q_NU = construct_UN(N,U);
-%No corresponding N updates since Q = N
-Q_N_tilde = N_tilde;
-Q_N = N;
+%Get edge values (edges_linear)
+% Output: (cell edge values) in cell i
+% [ i - 1/2 (+), i + 1/2 (-) ]
+[Q_plus_I, Q_minus_I] = edges_linear(Q_tilde,dQ);
+[Q_plus_R, ~] = edges_linear(Q_tilde(:,R),dQ(:,R));
+[~, Q_minus_L] = edges_linear(Q_tilde(:,L),dQ(:,L));
 
 %Get the edge values (cell edges, in cell i)
-[Q_NU_plus_I, Q_NU_minus_I] = edges(Q_NU_tilde,grid);
-[~, Q_NU_minus_R] = edges(Q_NU_tilde(R,:),grid);
-[Q_NU_plus_L, ~] = edges(Q_NU_tilde(L,:),grid);
-
-[Q_N_plus_I, Q_N_minus_I] = edges(Q_N_tilde,grid);
-[~, Q_N_minus_R] = edges(Q_N_tilde(R),grid);
-[Q_N_plus_L, ~] = edges(Q_N_tilde(L),grid);
+% [Q_plus_I, Q_minus_I] = edges(Q_tilde);
+% [Q_plus_R, ~] = edges(Q_tilde(:,R));
+% [~, Q_minus_L] = edges(Q_tilde(:,L));
 
 %Update the fluxes
-F_NU_plus =  F_NU(Q_NU_plus_I,Q_NU_minus_R, Q_N_plus_I, Q_N_minus_R);
-F_NU_minus = F_NU(Q_NU_plus_L,Q_NU_minus_I, Q_N_plus_L, Q_N_minus_I);
-F_N_plus =  F_N(Q_NU_plus_I,Q_NU_minus_R, Q_N_plus_I, Q_N_minus_R);
-F_N_minus = F_N(Q_NU_plus_L,Q_NU_minus_I, Q_N_plus_L, Q_N_minus_I);
+F_R =  Flux(Q_minus_I,Q_plus_R);
+F_L = Flux(Q_minus_L,Q_plus_I);
 
 %Compute the updated Q
-Q_NU = Q_NU - grid.dt/(grid.dx)*(F_NU_plus - F_NU_minus);
-Q_N = Q_N - grid.dt/(grid.dx)*(F_N_plus - F_N_minus);
+Q = Q - grid.dt/(grid.dx)*(F_R - F_L);
 
-%Destruct Q into N, Ux, Uy, Uz
-[Ux,Uy,Uz] = destruct_UN(Q_NU,N);
-Ux = Ux';
-Uy = Uy';
-Uz = Uz';
-N = Q_N';
+% Destruct Q into it's components
+[N, Ux, Uy, Uz] = destruct(Q);
 
 % Interpolate back
 Uy = interp_center_to_edge(Uy,grid);
@@ -82,69 +70,47 @@ end
 
 %Locally defined functions for MUSCL-Handcock:
 
-%Fluxes N
-function [Flux] = F_N(Q_NU_R, Q_NU_L, Q_NR, Q_NL)
-
-% compute c for the lax flux
-UR2 = ( Q_NU_R(:,1).^2 + Q_NU_R(:,2).^2 + Q_NU_R(:,3).^2 )./(Q_NR.^2);
-UL2 = ( Q_NU_L(:,1).^2 + Q_NU_L(:,2).^2 + Q_NU_L(:,3).^2 )./(Q_NL.^2);
-vRx = (Q_NU_R(:,1)./Q_NR)./(sqrt(1 + UR2));
-vLx = (Q_NU_L(:,1)./Q_NL)./(sqrt(1 + UL2));
-c = max( vRx, vLx ); %Must be a vector!
-
-%Rusanov Flux F = vxQ
-F_Q_minus = vLx.*Q_NL;
-F_Q_plus = vRx.*Q_NR;
-Flux = (1/2) * ( F_Q_minus + F_Q_plus  - c.*( Q_NR - Q_NL ) );
-
-end
-
-
-
-%Fluxes NU
-function [Flux] = F_NU(QR, QL, NR, NL)
-
-% compute c for the lax flux
-UR2 = ( QR(:,1).^2 + QR(:,2).^2 + QR(:,3).^2 )./(NR.^2);
-UL2 = ( QL(:,1).^2 + QL(:,2).^2 + QL(:,3).^2 )./(NL.^2);
-vRx = (QR(:,1)./NR)./(sqrt(1 + UR2));
-vLx = (QL(:,1)./NL)./(sqrt(1 + UL2));
-c = max( vRx, vLx ); %Must be a vector!
-
-%Rusanov Flux F = vxQ
-F_Q_minus = vLx.*QL;
-F_Q_plus = vRx.*QR;
-Flux = (1/2) * ( F_Q_minus + F_Q_plus  - c.*( QR - QL ) );
-
-end
 
 %Construct Q
-function [Q] = construct_UN(N,U)
-
-% Build Q
-Q = N.*U;
-
+function [Q] = construct(N, Ux, Uy, Uz)
+Q = [N', (N.*Ux)', (N.*Uy)', (N.*Uz)'];
+Q = Q';
 end
 
 
-%Destruct Q
-function [Ux,Uy,Uz] = destruct_UN(Q,N)
+%Destruct Q into N, Ux, Uy, Uz
+function [N, Ux, Uy, Uz] = destruct(Q)
+N = Q(1,:);
+Ux = Q(2,:)./N;
+Uy = Q(3,:)./N;
+Uz = Q(4,:)./N;
+end
 
-%destruct Q
-Ux = Q(:,1)./N;
-Uy = Q(:,2)./N;
-Uz = Q(:,3)./N;
+%Fluxes N
+function [Fl] = Flux(QL,QR)
+
+[~, UxR, UyR, UzR] = destruct(QR);
+[~, UxL, UyL, UzL] = destruct(QL);
+
+% compute c for the lax flux
+UR2 = ( UxR.^2 + UyR.^2 + UzR.^2 );
+UL2 = ( UxL.^2 + UyL.^2 + UzL.^2 );
+vRx = UxR./(sqrt(1 + UR2));
+vLx = UxL./(sqrt(1 + UL2));
+c = max( vRx, vLx );
+
+%Rusanov Flux F = vxQ
+FL = vLx.*QL;
+FR = vRx.*QR;
+Fl = (1/2) * ( FR + FL  - c.*( QR - QL ) );
 
 end
 
 %Reconstruction
-function [W_rec,dW] = reconstruct(Wi,Wm,Wp,x,xi,dx)
+function [dW] = reconstruct(Wi,Wm,Wp)
 
 %Average Dw
 dW = ave( Wi - Wm, Wp - Wi );
-
-%Rec with linear:
-W_rec = Wi + ((x-xi)/dx)'.*dW;
 
 end
 
@@ -211,43 +177,60 @@ end
 
 
 % Function A(Q)
-function [AQ] = AQ(Q,N,problem)
+function [A] = AQ(Q,grid)
 
-% Compute A(Q^n), can be vectors, for dt(UN), (matrix?)
-if problem == "fluid"
-    AQ = 2*(Q(1)/N)*(1/sqrt(1+(Q(1)^2 + Q(2)^2 + Q(3)^2)/(N^2))) + ...
-        - ((Q(1)/N)^3)*(1/sqrt(1+(Q(1)^2 + Q(2)^2 + Q(3)^2)/(N^2)));
-    % Compute A(Q^n), can be vectors, for dt(N)
-elseif problem == "density"
-    % Note Qi = U here:
-    AQ =  (Q(:,1)).*(1./sqrt(1+(Q(:,1).^2 + Q(:,2).^2 + Q(:,3).^2)));
-else
-    fprintf("A(Q) Not Found! \n");
-    exit();
+% Build the 4x4 flux Jacobian... (See Maxima generated values)
+% [ A11, A12, A13, A14 ]
+% [ A21, A22, A23, A24 ]
+% [ A31, A32, A33, A34 ]
+% [ A41, A42, A43, A44 ]
+
+%Recover primitive variables
+[~, Ux, Uy, Uz] = destruct(Q);
+
+%Definte helper functions
+a = Uz.^4+(2*Uy.^2+2*Ux.^2+2).*Uz.^2+Uy.^4+(2*Ux.^2+2).*Uy.^2+Ux.^4+2*Ux.^2+1;
+gamma = sqrt(1 + Ux.*Ux + Uy.*Uy + Uz.*Uz );
+
+%Build the components of A
+A11 = ((Ux.*Uz.^2+Ux.*Uy.^2+Ux.^3).*gamma)./a;
+A12 = ((Uz.^2+Uy.^2+1).*gamma)./a;
+A13 = -(Ux.*Uy)./gamma.^3;
+A14 = -(Ux.*Uz)./gamma.^3;
+A21 = -Ux.^2./gamma.^3;
+A22 = ((2.*Ux.*Uz.^2+2.*Ux.*Uy.^2+Ux.^3+2.*Ux).*gamma)./a;
+A23 = -(Ux.^2.*Uy)./gamma.^3;
+A24 = -(Ux.^2.*Uz)./gamma.^3;
+A31 = -(Ux.*Uy)./gamma.^3;
+A32 = ((Uy.*Uz.^2+Uy.^3+Uy).*gamma)./a;
+A33 = ((Ux.*Uz.^2+Ux.^3+Ux).*gamma)./a;
+A34 = -(Ux.*Uy.*Uz)./gamma.^3;
+A41 = -(Ux.*Uz)./gamma.^3;
+A42 = ((Uz.^3+(Uy.^2+1).*Uz).*gamma)./a;
+A43 = -(Ux.*Uy.*Uz)./gamma.^3;
+A44 = ((Ux.*Uy.^2+Ux.^3+Ux).*gamma)./a;
+
+%Assemble A
+A = zeros(4,4,grid.Nx-1);
+for i = 1:grid.Nx-1
+A(:,:,i) = [ [ A11(i), A12(i), A13(i), A14(i) ];...
+             [ A21(i), A22(i), A23(i), A24(i) ];...
+             [ A31(i), A32(i), A33(i), A34(i) ];...
+             [ A41(i), A42(i), A43(i), A44(i) ] ];
 end
-end
-
-
-% Function Ap(Q)
-function [AQ] = Aprim(U,N,problem)
-N = N';
-
-% Compute A(Q^n), This is  the velocity (x) in each cell which NU advects with
-if problem == "fluid"
-    AQ = (U(:,1)).*(1./sqrt(1+(U(:,1).^2 + U(:,2).^2 + U(:,3).^2)));
-    % Compute A(Q^n), can be vectors, for dt(N)
-elseif problem == "particles"
-    fprintf("Particles incomplete\n");
-    exit();
-else
-    fprintf("A(Q) Not Found! \n");
-    exit();
-end
 
 end
+
+
+function [W_plus, W_minus] = edges_linear(W_tilde,dW)
+W_plus = W_tilde - dW/2;
+W_minus = W_tilde + dW/2;
+end
+
 
 % Compute the edge values
-function [W_plus, W_minus] = edges(W_tilde,grid)
+function [W_plus, W_minus] = edges(W_tilde)
+% |+  x  -|
 %Linear assumption
 
 %Compute W_plus and W_minus
@@ -256,7 +239,7 @@ function [W_plus, W_minus] = edges(W_tilde,grid)
 % W_minus = W_tilde + dW/2;
 
 %Interpolate 1:
-W_tilde = W_tilde';
+%W_tilde = W_tilde';
 sz = size(W_tilde);
 sz2 = [sz(1),sz(2)+1];
 W_tilde_interp = zeros(sz2);
@@ -264,22 +247,25 @@ W_plus = zeros(sz);
 W_minus = zeros(sz);
 for i = 1:sz2(1)
     W_tilde_interp(i,:) = interp_center_to_edge_local(W_tilde(i,:));
-    W_plus(i,:) = W_tilde_interp(i,2:end);
-    W_minus(i,:) = W_tilde_interp(i,1:end-1);
+    W_plus(i,:) = W_tilde_interp(i,1:end-1);
+    W_minus(i,:) = W_tilde_interp(i,2:end);
 end
-W_plus = W_plus';
-W_minus = W_minus';
 
 
 end
-
 
 % Local center to edge, with unique fluxes
 function [y_interp] = interp_center_to_edge_local(y)
-    Nx = max(size(y));
-    x = linspace(0,1,Nx);
-    dx = x(2)-x(1);
-    x2 = linspace(0+dx/2,1-dx/2,Nx-1);
-    y_interp = interp1(x,y,x2,'spline');
-    y_interp = [y_interp(1),y_interp,y_interp(end)]; % Signal issue if not delt with!
+Nx = max(size(y));
+x = linspace(0,1,Nx);
+dx = x(2)-x(1);
+x2 = linspace(0+dx/2,1-dx/2,Nx-1);
+y_interp = interp1(x,y,x2,'spline');
+y_interp = [y_interp(1),y_interp,y_interp(end)]; % Signal issue if not delt with!
+end
+
+%Sup function
+function [sup_val] = sup(values)
+[maxB, index] = max(abs(values));
+sup_val = maxB * sign(values(index));
 end

@@ -28,7 +28,7 @@ if grid.BC_type == "Propagation into a plasma wave beach"
     grid.L = (grid.xmax - grid.xmin);
     grid.dx = grid.L/grid.Nx;
     grid.time = 0;
-    grid.cfl = 0.90; %clf = udt/dx <= C_max
+    grid.cfl = 0.98; %clf = udt/dx <= C_max
     grid.dt = grid.cfl*grid.dx/grid.c;
     grid.deltat = grid.L/(100*grid.c); %grid.cfl*grid.dx/grid.c;
     grid.t_max = 5e-9;
@@ -46,7 +46,7 @@ if grid.BC_type == "Propagation into a plasma wave beach"
     grid.N0 = N(1);
 
     %Overwrite for traveling photon case:
-    N = N*0 + 1;
+    %N = N*0 + 1;
 
     % External quantities
     grid.external_Bx = 0;
