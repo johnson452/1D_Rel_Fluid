@@ -13,9 +13,9 @@
 function [Ux,Uy,Uz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid)
 
 %Locally interpolate U, N to cell centers for update
-Uy = interp_edge_to_center(Uy,grid);
-Uz = interp_edge_to_center(Uz,grid);
-N = interp_edge_to_center(N,grid);
+%Uy = interp_edge_to_center(Uy,grid);
+%Uz = interp_edge_to_center(Uz,grid);
+%N = interp_edge_to_center(N,grid);
 
 % Build Q
 Q = construct(N, Ux, Uy, Uz);
@@ -24,8 +24,8 @@ Nx = grid.Nx;
 
 %Iterate over the domain
 % I = linspace(1,Nx-1,Nx-1); %DEFAULT
-R = mod( linspace(1,Nx-1,Nx-1), Nx-1) + 1;
-L = mod( linspace(-1,Nx-3,Nx-1), Nx-1) + 1;
+R = mod( linspace(1,Nx,Nx), Nx-1) + 1; %mod( linspace(1,Nx,Nx), Nx) + 1; %Good
+L = mod( linspace(-1,Nx-2,Nx), Nx-1) + 1; %mod( linspace(-1,Nx-2,Nx), Nx) + 1; %Good
 
 %Reconstruct U(x) (soln) within one cell, also slope dU
 dQ = reconstruct(Q,Q(:,L),Q(:,R));
@@ -33,8 +33,8 @@ dQ = reconstruct(Q,Q(:,L),Q(:,R));
 %Update solution, primative variables
 %Q_tilde = Q - grid.dt/(2*grid.dx)*AQ(Q,grid).*dQ;
 A = AQ(Q,grid);
-Q_tilde = zeros(4,grid.Nx-1);
-for i = 1:Nx-1
+Q_tilde = zeros(4,grid.Nx);
+for i = 1:Nx
     Q_tilde(:,i) = Q(:,i) - grid.dt/(2*grid.dx)*A(:,:,i)*dQ(:,i);
 end
 
@@ -61,9 +61,9 @@ Q = Q - grid.dt/(grid.dx)*(F_R - F_L);
 [N, Ux, Uy, Uz] = destruct(Q);
 
 % Interpolate back
-Uy = interp_center_to_edge(Uy,grid);
-Uz = interp_center_to_edge(Uz,grid);
-N = interp_center_to_edge(N,grid);
+%Uy = interp_center_to_edge(Uy,grid);
+%Uz = interp_center_to_edge(Uz,grid);
+%N = interp_center_to_edge(N,grid);
 
 end
 
@@ -97,7 +97,7 @@ UR2 = ( UxR.^2 + UyR.^2 + UzR.^2 );
 UL2 = ( UxL.^2 + UyL.^2 + UzL.^2 );
 vRx = UxR./(sqrt(1 + UR2));
 vLx = UxL./(sqrt(1 + UL2));
-c = max( vRx, vLx );
+c = max( abs(vRx), abs(vLx) ); %%% FIX ABS | lamdba^p|
 
 %Rusanov Flux F = vxQ
 FL = vLx.*QL;
@@ -117,7 +117,7 @@ end
 % Averaging
 function [dW] = ave( Wm, Wp )
 
-avg_type = "Supebee"; %"standard";
+avg_type = "minmod"; %"Supebee"; %"standard";
 a = Wm; b = Wp;
 ab = a.*b;
 sz_a = size(a);
@@ -211,8 +211,8 @@ A43 = -(Ux.*Uy.*Uz)./gamma.^3;
 A44 = ((Ux.*Uy.^2+Ux.^3+Ux).*gamma)./a;
 
 %Assemble A
-A = zeros(4,4,grid.Nx-1);
-for i = 1:grid.Nx-1
+A = zeros(4,4,grid.Nx);
+for i = 1:grid.Nx
 A(:,:,i) = [ [ A11(i), A12(i), A13(i), A14(i) ];...
              [ A21(i), A22(i), A23(i), A24(i) ];...
              [ A31(i), A32(i), A33(i), A34(i) ];...

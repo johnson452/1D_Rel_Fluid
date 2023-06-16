@@ -12,9 +12,6 @@ grid.JdotE(grid.iter) = grid.dx*(sum(Jx.*Ex) + sum(Jy.*Ey) + sum(Jz.*Ez));
 Bx = interp_edge_to_center(Bx,grid);
 Ey = interp_edge_to_center(Ey,grid);
 Ez = interp_edge_to_center(Ez,grid);
-Uy = interp_edge_to_center(Uy,grid);
-Uz = interp_edge_to_center(Uz,grid);
-N  = interp_edge_to_center(N ,grid);
 
 %Total Energy Calcs ( Eliminate double dounting edge cell )
 grid.Total_Energy_E_field(grid.iter) = grid.dx*(grid.eps_0/2) * ( sum(Ex.*Ex) +...

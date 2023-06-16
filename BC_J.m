@@ -1,4 +1,4 @@
-function [Uy,Uz,Vy,Vz] = BC_J(Uy,Uz,Vx,Vy,Vz,N,grid)
+function [Ux,Uy,Uz,Vx,Vy,Vz] = BC_J(Ux,Uy,Uz,Vx,Vy,Vz,N,grid)
 
 if grid.BC_type == "Periodic"
     %Handled by Interpolations
@@ -19,13 +19,17 @@ if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
     Uy(Nx-1) = Vy(Nx-1)*gamma;
 
     %Copy Booundaries
+    Ux(1) = Ux(2);
     Uy(1) = Uy(2);
     Uz(1) = Uz(2);
+    Vx(1) = Vx(2);
     Vy(1) = Vy(2);
     Vz(1) = Vz(2);
 
+    Ux(Nx) = Ux(Nx-1);
     Uy(Nx) = Uy(Nx-1);
     Uz(Nx) = Uz(Nx-1);
+    Vx(Nx) = Vx(Nx-1);
     Vy(Nx) = Vy(Nx-1);
     Vz(Nx) = Vz(Nx-1);
 
@@ -49,13 +53,17 @@ if grid.BC_type == "Propagation into a plasma wave beach"
     end
 
     %Copy Booundaries
+    Ux(1) = Ux(2);
     Uy(1) = Uy(2);
     Uz(1) = Uz(2);
+    Vx(1) = Vx(2);
     Vy(1) = Vy(2);
     Vz(1) = Vz(2);
 
+    Ux(Nx) = Ux(Nx-1);
     Uy(Nx) = Uy(Nx-1);
     Uz(Nx) = Uz(Nx-1);
+    Vx(Nx) = Vx(Nx-1);
     Vy(Nx) = Vy(Nx-1);
     Vz(Nx) = Vz(Nx-1);
 

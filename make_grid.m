@@ -2,7 +2,7 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid
 
 %%% Initialize memory %%%
 %[DEFAULT] Setup Grid: (Boundary Grid):
-grid.Nx = 400; % Only specified here 
+grid.Nx = 100; % Only specified here 
 grid.xmin = 0;
 grid.xmax = 1.0;
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
@@ -10,7 +10,7 @@ grid.time = 0;
 grid.dt = 0.1;
 grid.t_max = 200;
 grid.NT = ceil(grid.t_max/grid.dt);
-grid.Output_interval = 1;
+grid.Output_interval = 1000;
 
 %[DEFAULT] Constants, updated in IC.m
 grid.c = 1;
@@ -82,19 +82,19 @@ Jz = zeros(1,Nx);
 Bx = zeros(1,Nx);
 By = zeros(1,Nx-1);
 Bz = zeros(1,Nx-1);
-Ux = zeros(1,Nx-1);
+Ux = zeros(1,Nx);
 Uy = zeros(1,Nx);
 Uz = zeros(1,Nx);
 N = zeros(1,Nx);
-Vx = zeros(1,Nx-1);
+Vx = zeros(1,Nx);
 Vy = zeros(1,Nx);
 Vz = zeros(1,Nx);
 
 %BCs and ICs extensions
-% grid.BC_cond = "Periodic";
-% grid.BC_type = "Periodic";
-% grid.IC_type = grid.BC_type;
-% grid.problem_name = "Periodic_Photon";
+grid.BC_cond = "Periodic";
+grid.BC_type = "Periodic";
+grid.IC_type = grid.BC_type;
+grid.problem_name = "Periodic_Photon";
 
 %JE9: Cuttoff EC
 %Turn on options: i.e. If there are externally applied fields, based on 
@@ -106,10 +106,11 @@ Vz = zeros(1,Nx);
 
 
 %JE8: Cuttoff Plasma Wave beach
-grid.problem_name = "JE8";
-grid.BC_cond = "Non_Periodic";
-grid.BC_type = "Propagation into a plasma wave beach";
-grid.IC_type = grid.BC_type;
+% grid.problem_name = "JE8";
+% grid.BC_cond = "Non_Periodic";
+% grid.BC_type = "Propagation into a plasma wave beach";
+% grid.IC_type = grid.BC_type;
+
 
 %Make the file/ delete if already exists:
 grid.filename = "Output/out.txt";
