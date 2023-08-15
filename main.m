@@ -43,15 +43,16 @@ while(grid.time < grid.t_max)
     grid.iter = grid.iter + 1;
   
     %Push U (n - 3/2 -> n - 1/2 (Need E and B both at n), U is on the half-grid
-    [Ux,Uy,Uz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid);
+    [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_source_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
     [Ux,Uy,Uz,Vx,Vy,Vz] = BC_J(Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
      N = BC_N(N,Vx,Vy,Vz,grid);
-    [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_source_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
+     [Ux,Uy,Uz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid);
     [Ux,Uy,Uz,Vx,Vy,Vz] = BC_J(Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
      N = BC_N(N,Vx,Vy,Vz,grid);
 
     %Advance B field (n - 1 -> n - 1/2) using E|n-1
     [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
+    [Ex,Ey,Ez,Bx,By,Bz,Uy,Uz,~,~] = BC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
 
     %Deposit the Current (time n - 1/2)
     [Jx,Jy,Jz] = J_deposition(N,Vx,Vy,Vz,grid);
@@ -62,6 +63,10 @@ while(grid.time < grid.t_max)
     
     %Advance B field (n - 1/2 -> n)
     [Bx,By,Bz] = push_B(Bx,By,Bz,Ex,Ey,Ez,grid);
+    [Ex,Ey,Ez,Bx,By,Bz,Uy,Uz,Jy,Jz] = BC(Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
+
+    %Moving Frame (at time n):
+    [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid] = moving_frame(N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
     
 end
 

@@ -45,25 +45,15 @@ end
 [Q_plus_R, ~] = edges_linear(Q_tilde(:,R),dQ(:,R));
 [~, Q_minus_L] = edges_linear(Q_tilde(:,L),dQ(:,L));
 
-%Get the edge values (cell edges, in cell i)
-% [Q_plus_I, Q_minus_I] = edges(Q_tilde);
-% [Q_plus_R, ~] = edges(Q_tilde(:,R));
-% [~, Q_minus_L] = edges(Q_tilde(:,L));
-
 %Update the fluxes
-F_R =  Flux(Q_minus_I,Q_plus_R);
-F_L = Flux(Q_minus_L,Q_plus_I);
+F_R =  Flux(Q_minus_I,Q_plus_R,grid);
+F_L = Flux(Q_minus_L,Q_plus_I,grid);
 
 %Compute the updated Q
 Q = Q - grid.dt/(grid.dx)*(F_R - F_L);
 
 % Destruct Q into it's components
 [N, Ux, Uy, Uz] = destruct(Q);
-
-% Interpolate back
-%Uy = interp_center_to_edge(Uy,grid);
-%Uz = interp_center_to_edge(Uz,grid);
-%N = interp_center_to_edge(N,grid);
 
 end
 
@@ -87,14 +77,15 @@ Uz = Q(4,:)./N;
 end
 
 %Fluxes N
-function [Fl] = Flux(QL,QR)
+function [Fl] = Flux(QL,QR,grid)
 
+c = grid.c;
 [~, UxR, UyR, UzR] = destruct(QR);
 [~, UxL, UyL, UzL] = destruct(QL);
 
 % compute c for the lax flux
-UR2 = ( UxR.^2 + UyR.^2 + UzR.^2 );
-UL2 = ( UxL.^2 + UyL.^2 + UzL.^2 );
+UR2 = ( UxR.^2 + UyR.^2 + UzR.^2 )/(c^2);
+UL2 = ( UxL.^2 + UyL.^2 + UzL.^2 )/(c^2);
 vRx = UxR./(sqrt(1 + UR2));
 vLx = UxL./(sqrt(1 + UL2));
 c = max( abs(vRx), abs(vLx) ); %%% FIX ABS | lamdba^p|
@@ -189,34 +180,36 @@ function [A] = AQ(Q,grid)
 [~, Ux, Uy, Uz] = destruct(Q);
 
 %Definte helper functions
-a = Uz.^4+(2*Uy.^2+2*Ux.^2+2).*Uz.^2+Uy.^4+(2*Ux.^2+2).*Uy.^2+Ux.^4+2*Ux.^2+1;
-gamma = sqrt(1 + Ux.*Ux + Uy.*Uy + Uz.*Uz );
+c = grid.c;
+c_sq = c^2;
+gamma = sqrt(1.0 + (Ux.*Ux + Uy.*Uy + Uz.*Uz)/(c_sq) );
+a = c_sq*gamma.*gamma.*gamma;
 
 %Build the components of A
-A11 = ((Ux.*Uz.^2+Ux.*Uy.^2+Ux.^3).*gamma)./a;
-A12 = ((Uz.^2+Uy.^2+1).*gamma)./a;
-A13 = -(Ux.*Uy)./gamma.^3;
-A14 = -(Ux.*Uz)./gamma.^3;
-A21 = -Ux.^2./gamma.^3;
-A22 = ((2.*Ux.*Uz.^2+2.*Ux.*Uy.^2+Ux.^3+2.*Ux).*gamma)./a;
-A23 = -(Ux.^2.*Uy)./gamma.^3;
-A24 = -(Ux.^2.*Uz)./gamma.^3;
-A31 = -(Ux.*Uy)./gamma.^3;
-A32 = ((Uy.*Uz.^2+Uy.^3+Uy).*gamma)./a;
-A33 = ((Ux.*Uz.^2+Ux.^3+Ux).*gamma)./a;
-A34 = -(Ux.*Uy.*Uz)./gamma.^3;
-A41 = -(Ux.*Uz)./gamma.^3;
-A42 = ((Uz.^3+(Uy.^2+1).*Uz).*gamma)./a;
-A43 = -(Ux.*Uy.*Uz)./gamma.^3;
-A44 = ((Ux.*Uy.^2+Ux.^3+Ux).*gamma)./a;
+A00 = (Ux.*(Uz.*Uz)+Ux.*(Uy.*Uy)+(Ux.*Ux.*Ux))./a;
+A01 = ((c_sq)+(Uz.*Uz)+(Uy.*Uy))./a;
+A02 = -(Ux.*Uy)./a;
+A03 = -(Ux.*Uz)./a;
+A10 = -(Ux.*Ux)./(gamma.*gamma.*gamma);
+A11 = (2.0*Ux*(c_sq)+2.0*Ux.*(Uz.*Uz)+2.0*Ux.*(Uy.*Uy)+(Ux.*Ux.*Ux))./a;
+A12 = -((Ux.*Ux).*Uy)./a;
+A13 = -((Ux.*Ux).*Uz)./a;
+A20 = -(Ux.*Uy)./(gamma.*gamma.*gamma);
+A21 = (Uy*(c_sq)+Uy.*(Uz.*Uz)+(Uy.*Uy.*Uy))./a;
+A22 = (Ux*(c_sq)+Ux.*(Uz.*Uz)+(Ux.*Ux.*Ux))./a;
+A23 = -(Ux.*Uy.*Uz)./a;
+A30 = -(Ux.*Uz)./(gamma.*gamma.*gamma);
+A31 = (Uz.*(c_sq)+(Uz.*Uz.*Uz)+(Uy.*Uy).*Uz)./a;
+A32 = -(Ux.*Uy.*Uz)./a;
+A33 = (Ux*(c_sq)+Ux.*(Uy.*Uy)+(Ux.*Ux.*Ux))./a;
 
 %Assemble A
 A = zeros(4,4,grid.Nx);
 for i = 1:grid.Nx
-A(:,:,i) = [ [ A11(i), A12(i), A13(i), A14(i) ];...
-             [ A21(i), A22(i), A23(i), A24(i) ];...
-             [ A31(i), A32(i), A33(i), A34(i) ];...
-             [ A41(i), A42(i), A43(i), A44(i) ] ];
+A(:,:,i) = [ [ A00(i), A01(i), A02(i), A03(i) ];...
+             [ A10(i), A11(i), A12(i), A13(i) ];...
+             [ A20(i), A21(i), A22(i), A23(i) ];...
+             [ A30(i), A31(i), A32(i), A33(i) ] ];
 end
 
 end
@@ -227,45 +220,3 @@ W_plus = W_tilde - dW/2;
 W_minus = W_tilde + dW/2;
 end
 
-
-% Compute the edge values
-function [W_plus, W_minus] = edges(W_tilde)
-% |+  x  -|
-%Linear assumption
-
-%Compute W_plus and W_minus
-% (Linear)
-% W_plus = W_tilde - dW/2;
-% W_minus = W_tilde + dW/2;
-
-%Interpolate 1:
-%W_tilde = W_tilde';
-sz = size(W_tilde);
-sz2 = [sz(1),sz(2)+1];
-W_tilde_interp = zeros(sz2);
-W_plus = zeros(sz);
-W_minus = zeros(sz);
-for i = 1:sz2(1)
-    W_tilde_interp(i,:) = interp_center_to_edge_local(W_tilde(i,:));
-    W_plus(i,:) = W_tilde_interp(i,1:end-1);
-    W_minus(i,:) = W_tilde_interp(i,2:end);
-end
-
-
-end
-
-% Local center to edge, with unique fluxes
-function [y_interp] = interp_center_to_edge_local(y)
-Nx = max(size(y));
-x = linspace(0,1,Nx);
-dx = x(2)-x(1);
-x2 = linspace(0+dx/2,1-dx/2,Nx-1);
-y_interp = interp1(x,y,x2,'spline');
-y_interp = [y_interp(1),y_interp,y_interp(end)]; % Signal issue if not delt with!
-end
-
-%Sup function
-function [sup_val] = sup(values)
-[maxB, index] = max(abs(values));
-sup_val = maxB * sign(values(index));
-end

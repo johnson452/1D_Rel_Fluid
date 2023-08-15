@@ -5,6 +5,26 @@ if grid.BC_type == "Periodic"
 
 end
 
+if grid.BC_type == "WFA"
+    Nx = grid.Nx;
+
+    %Copy Boundaries
+    Ux(1) = Ux(3); %%ALL NODAL
+    Uy(1) = Uy(3);
+    Uz(1) = Uz(3);
+    Vx(1) = Vx(3);
+    Vy(1) = Vy(3);
+    Vz(1) = Vz(3);
+
+    Ux(Nx) = Ux(Nx-2);
+    Uy(Nx) = Uy(Nx-2);
+    Uz(Nx) = Uz(Nx-2);
+    Vx(Nx) = Vx(Nx-2);
+    Vy(Nx) = Vy(Nx-2);
+    Vz(Nx) = Vz(Nx-2);
+
+end
+
 if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
     Nx = grid.Nx;
     J0 = grid.J0;
@@ -13,12 +33,11 @@ if grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer"
     t0 = grid.t0;
 
     %Current at the boundary
-    Vx_temp = interp_center_to_edge(Vx,grid);
     Vy(Nx-1) = 3*(1/(N(Nx-1)*grid.e0))*J0*sin(2*pi*fd*t)*sin(0.5*pi*min(1,t/t0))^2;
-    gamma = (1/sqrt(1 - ( Vx_temp(Nx-1)*Vx_temp(Nx-1) + Vy(Nx-1)*Vy(Nx-1) + Vz(Nx-1)*Vz(Nx-1)  )/(grid.c*grid.c))) ;
+    gamma = (1/sqrt(1 - ( Vx(Nx-1)*Vx(Nx-1) + Vy(Nx-1)*Vy(Nx-1) + Vz(Nx-1)*Vz(Nx-1)  )/(grid.c*grid.c))) ;
     Uy(Nx-1) = Vy(Nx-1)*gamma;
 
-    %Copy Booundaries
+    %Copy Boundaries
     Ux(1) = Ux(2);
     Uy(1) = Uy(2);
     Uz(1) = Uz(2);
@@ -52,7 +71,7 @@ if grid.BC_type == "Propagation into a plasma wave beach"
     fprintf("Vy(Nx-1)/c < 1 --> (%f) < 1\n",Vy(Nx-1)/grid.c);
     end
 
-    %Copy Booundaries
+    %Copy Boundaries
     Ux(1) = Ux(2);
     Uy(1) = Uy(2);
     Uz(1) = Uz(2);

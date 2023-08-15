@@ -2,7 +2,7 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid
 
 %%% Initialize memory %%%
 %[DEFAULT] Setup Grid: (Boundary Grid):
-grid.Nx = 100; % Only specified here 
+grid.Nx = 512; % Only specified here 
 grid.xmin = 0;
 grid.xmax = 1.0;
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
@@ -10,7 +10,8 @@ grid.time = 0;
 grid.dt = 0.1;
 grid.t_max = 200;
 grid.NT = ceil(grid.t_max/grid.dt);
-grid.Output_interval = 1000;
+grid.Output_interval = 2000;
+grid.moving_frame = 0;
 
 %[DEFAULT] Constants, updated in IC.m
 grid.c = 1;
@@ -61,16 +62,6 @@ grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
 grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
 
 
-%Total Energy
-grid.Total_Energy_E_field = zeros(1,grid.NT);
-grid.Total_Energy_B_field = zeros(1,grid.NT);
-grid.Total_Energy_field = zeros(1,grid.NT);
-grid.Total_Energy_ptcls = zeros(1,grid.NT);
-grid.Total_Momentum_ptcls = zeros(3,grid.NT);
-grid.Total_Momentum_fields = zeros(3,grid.NT);
-grid.Total_Momentum_Magnitude_ptcls = zeros(1,grid.NT);
-grid.Total_Momentum_Magnitude_fields = zeros(1,grid.NT);
-
 %Main Grids
 Nx = grid.Nx;
 Ex = zeros(1,Nx-1);
@@ -90,13 +81,19 @@ Vx = zeros(1,Nx);
 Vy = zeros(1,Nx);
 Vz = zeros(1,Nx);
 
-%BCs and ICs extensions
-grid.BC_cond = "Periodic";
-grid.BC_type = "Periodic";
+% WFA
+grid.problem_name = "WFA";
+grid.BC_cond = "Non_Periodic";
+grid.BC_type = "WFA";
 grid.IC_type = grid.BC_type;
-grid.problem_name = "Periodic_Photon";
 
-%JE9: Cuttoff EC
+% BCs and ICs extensions
+% grid.BC_cond = "Periodic";
+% grid.BC_type = "Periodic";
+% grid.IC_type = grid.BC_type;
+% grid.problem_name = "Periodic_Photon";
+
+% JE9: Cuttoff EC
 %Turn on options: i.e. If there are externally applied fields, based on 
 %the name
 % grid.problem_name = "JE9";
@@ -105,17 +102,19 @@ grid.problem_name = "Periodic_Photon";
 % grid.IC_type = grid.BC_type;
 
 
-%JE8: Cuttoff Plasma Wave beach
+% JE8: Cuttoff Plasma Wave beach
 % grid.problem_name = "JE8";
 % grid.BC_cond = "Non_Periodic";
 % grid.BC_type = "Propagation into a plasma wave beach";
 % grid.IC_type = grid.BC_type;
 
 
+
+
 %Make the file/ delete if already exists:
-grid.filename = "Output/out.txt";
-if exist(grid.filename, 'file')==2
-  delete(grid.filename);
-end
+% grid.filename = "Output/out.txt";
+% if exist(grid.filename, 'file')==2
+%   delete(grid.filename);
+% end
 
 end

@@ -3,7 +3,7 @@ function grid = diagnostics(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,Ux,Uy,Uz,N,grid)
 
 %Total Energy Calcs
 str = "diagnostics.m";
-grid = energy_momentum_diagnostic(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,Ux,Uy,Uz,N,str,grid);
+%grid = energy_momentum_diagnostic(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,Ux,Uy,Uz,N,str,grid);
 
 
 % Run only at select iterations:
@@ -106,4 +106,36 @@ if (mod ( grid.iter, grid.Output_interval ) == 0 || grid.iter == grid.NT)
     %Pause and then clear figure
     pause(0.01)
 end
+
+if grid.BC_type == "Propagation into a plasma wave beach"
+    %Build extra plot
+    output_interval = floor(linspace(0,grid.NT,grid.contour_size)) + 1;
+    if ((grid.iter == grid.NT || max(output_interval == grid.iter)) ...
+            && (grid.BC_type == "Propagation into a plasma wave beach"))
+
+        % Ey vs time, x profile
+        grid.Ey_t_x(grid.temp_iter,:) = Ey;
+        grid.temp_iter = grid.temp_iter + 1;
+
+        % Plot only at the last time:
+        if grid.iter == grid.NT
+            figure(2)
+            time = linspace(0,grid.time,grid.contour_size);
+            x = grid.x1;
+            [~,h] = contourf(  x, time, grid.Ey_t_x, 50);
+            ylabel("t")
+            xlabel("x")
+            title("Ey")
+            colorbar()
+            set(h,'LineColor','none')
+
+            fprintf("Done!\n");
+
+        end
+
+    end
+end
+
+
+
 end

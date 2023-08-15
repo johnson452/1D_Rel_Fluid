@@ -7,7 +7,10 @@ elseif grid.BC_type == "Propagation into a plasma wave beach"
     % All other cases
     N(grid.Nx) = N(grid.Nx-1);
     N(1) = N(2); %(grid.wp(1).*grid.wp(1))*grid.eps_0*grid.m0/(grid.e0*grid.e0);
-
+elseif grid.BC_type == "WFA"
+    % Last point is a Ghost cell in WFA (matches WarpX)
+    N(grid.Nx) = N(grid.Nx-2);
+    N(1) = N(3);
 else
     % All other cases
     N(grid.Nx) = N(grid.Nx-1);

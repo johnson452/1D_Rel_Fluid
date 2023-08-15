@@ -5,9 +5,65 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid] = IC(N,Ex,Ey,Ez,Bx,By,Bz,J
 %Grab inital size:
 Nx = grid.Nx;
 
+%Wake Field Acceleration 1D
+if grid.BC_type == "WFA"
+    %Constants
+    grid.c = 299792458.;
+    grid.mu_0 = 4*pi*1e-7;
+    grid.eps_0 = 8.85418781762039e-12;
+    grid.iter = 1;
+    grid.m0 = 9.1093837e-31; %Electrons
+    grid.e0 = -1.60217663e-19; %Electrons
+
+    %Additional inputs [ SI ]
+    grid.xmin = -56.e-6;
+    grid.xmax = 80.e-6;
+
+    grid.L = (grid.xmax - grid.xmin);
+    grid.dx = grid.L/grid.Nx;
+    grid.time = 0;
+    grid.cfl = 0.90; %clf = udt/dx <= C_max
+    grid.dt = grid.cfl*grid.dx/grid.c;
+    grid.NT = 100;
+    grid.t_max = grid.NT*grid.dt;
+
+    %New grids
+    grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
+    grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
+
+    %Density
+    N = N*0.0 + 2.e23;
+    grid.N0 = N(1);
+
+    % External quantities
+    grid.external_Bx = 0;
+    grid.external_By = 0;
+    grid.external_Bz = 0;
+
+    grid.external_Ex = 0;
+    grid.external_Ey = 0;
+    grid.external_Ez = 0;
+
+    grid.moving_frame = 0;
+
+    %Laser quantities
+    %grid.laser1.profile      = Gaussian;          %assumed
+    grid.laser1.position    = 9.e-6;               % This point is on the laser plane
+    %grid.laser1.direction    = 0. 0. 1.           % The plane normal direction
+    %grid.laser1.polarization = 0. 1. 0.           % The main polarization vector
+    grid.laser1.E_max        = 16.e12;             % Maximum amplitude of the laser field (in V/m)
+    %grid.laser1.profile_waist = 5.e-6             % The waist of the laser (in m)
+    grid.laser1.profile_duration = 15.e-15;        % The duration of the laser (in s)
+    grid.laser1.profile_t_peak = 30.e-15;          % Time at which the laser reaches its peak (in s)
+    %grid.laser1.profile_focal_distance = 100.e-6  % Focal distance from the antenna (in m)
+    grid.laser1.wavelength = 0.8e-6;               % The wavelength of the laser (in m)
+
+end
+
+
 %Case of a plasma wave hitting a beach: JE8
 if grid.BC_type == "Propagation into a plasma wave beach"
-       %Constants
+    %Constants
     grid.c = 299792458.;
     grid.mu_0 = 4*pi*1e-7;
     grid.eps_0 = 8.85418781762039e-12;
@@ -29,24 +85,34 @@ if grid.BC_type == "Propagation into a plasma wave beach"
     grid.dx = grid.L/grid.Nx;
     grid.time = 0;
     grid.cfl = 0.98; %clf = udt/dx <= C_max
-    grid.dt = grid.cfl*grid.dx/grid.c;
+    grid.dt = (1/10)*grid.cfl*grid.dx/grid.c;
     grid.deltat = grid.L/(100*grid.c); %grid.cfl*grid.dx/grid.c;
     grid.t_max = 5e-9;
     grid.NT = ceil(grid.t_max/grid.dt);
     grid.omega = pi/(10*grid.deltat);
-    grid.fd = grid.omega/(pi*2);
+    %grid.fd = grid.omega/(pi*2);
 
     %New grids
     grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
     grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
 
     %Density
-    grid.wp = (1/grid.deltat)*((1-grid.x1)/grid.L).^5;
+    grid.wpdt = 25*((1-grid.x1)/grid.L).^5;
+    grid.wp = grid.wpdt/grid.deltat;
     N = (grid.wp.*grid.wp)*grid.eps_0*grid.m0/(grid.e0*grid.e0);
     grid.N0 = N(1);
 
     %Overwrite for traveling photon case:
     %N = N*0 + 1;
+
+    %TEMP DIAG
+%     plot(grid.x1,grid.x1*0. + grid.omega);
+%     hold on
+%     plot(grid.x1,grid.wp);
+%     hold on
+%     plot([0.58,0.58],[0,3e10],":black")
+%     legend("w","wp")
+    
 
     % External quantities
     grid.external_Bx = 0;
@@ -57,6 +123,12 @@ if grid.BC_type == "Propagation into a plasma wave beach"
     grid.external_Ey = 0;
     grid.external_Ez = 0;
 
+    % Build object for plasma beach:
+    if grid.BC_type == "Propagation into a plasma wave beach"
+        grid.contour_size = 400;
+        grid.temp_iter = 1;
+        grid.Ey_t_x = zeros(grid.contour_size,grid.Nx);
+    end
 
 end
 
@@ -135,7 +207,7 @@ if grid.BC_type == "Periodic"
     % Frequency (omega = C_frac*wp)
     N = N*0.0 + 1e17; %1e13
     wp = sqrt(grid.e0*grid.e0*mean(N)/(grid.eps_0*grid.m0));
-    omega_o_wave = 2.0* wp;
+    omega_o_wave = 2.0* wp; % Critical parameter for dampening
     grid.wp = wp;
     grid.N0 = N(1);
 
@@ -170,16 +242,16 @@ if grid.BC_type == "Periodic"
 
     %Initial Vy, Uy for current density with specified N
     if (0)
-    Bz_interp = interp_center_to_edge(Bz);
-    Vy = (1/(mean(N)*grid.mu_0*grid.e0))*( ...
-        (1/grid.c^2)*(Ey*omega_o_wave) - ...
-        (Bz_interp * k) );
-    if max(Vy)/grid.c > 1 
-        fprintf("Invalid IC\n");
-        pause(1000)
-    end
-    gamma = 1./sqrt(1-Vy.*Vy/(grid.c^2));
-    Uy = gamma.*Vy;
+        Bz_interp = interp_center_to_edge(Bz);
+        Vy = (1/(mean(N)*grid.mu_0*grid.e0))*( ...
+            (1/grid.c^2)*(Ey*omega_o_wave) - ...
+            (Bz_interp * k) );
+        if max(Vy)/grid.c > 1
+            fprintf("Invalid IC\n");
+            pause(1000)
+        end
+        gamma = 1./sqrt(1-Vy.*Vy/(grid.c^2));
+        Uy = gamma.*Vy;
     end
 end
 
@@ -189,5 +261,15 @@ fprintf("Grid: Nx: %d, NT: %d\n",grid.Nx,grid.NT);
 fprintf("Grid-Spacing: dx: %g, dT: %g\n",grid.dx,grid.dt);
 wp_mean = sqrt(grid.e0*grid.e0*mean(N)/(grid.eps_0*grid.m0));
 fprintf("Average: wp*dt: %f\n",wp_mean*grid.dt);
+
+%Total Energy
+grid.Total_Energy_E_field = zeros(1,grid.NT);
+grid.Total_Energy_B_field = zeros(1,grid.NT);
+grid.Total_Energy_field = zeros(1,grid.NT);
+grid.Total_Energy_ptcls = zeros(1,grid.NT);
+grid.Total_Momentum_ptcls = zeros(3,grid.NT);
+grid.Total_Momentum_fields = zeros(3,grid.NT);
+grid.Total_Momentum_Magnitude_ptcls = zeros(1,grid.NT);
+grid.Total_Momentum_Magnitude_fields = zeros(1,grid.NT);
 
 end

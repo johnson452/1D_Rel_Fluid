@@ -24,4 +24,25 @@ if (grid.BC_type == "Tunneling through an electron-cyclotron cutoff layer" ||...
 
 end
 
+if (grid.BC_type == "WFA")
+    N_max = max(size(Jy));
+
+    Ex(1) = 0;
+    Ey(1:2) = [0,0];
+    Ez(1:2) = [0,0];
+
+    Ex(N_max-1) = 0;
+    Ey(N_max-1:N_max) = [0,0];
+    Ez(N_max-1:N_max) = [0,0];
+
+    Bx(1:2) = [0,0];
+    By(1) = 0;
+    Bz(1) = 0;
+
+    Bx(N_max-1:N_max) = [0,0];
+    By(N_max-1) = 0;
+    Bz(N_max-1) = 0;
+
+end
+
 end
