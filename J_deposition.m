@@ -38,7 +38,8 @@ if grid.BC_type == "WFA"
 
     %Laser amplitude (t + dt/2)
     t = grid.time + grid.dt/2; 
-    Jy_laser = sin(2*pi*grid.c*t/grid.laser1.wavelength)*(2.0/(grid.mu_0*grid.c))*grid.laser1.E_max * exp(- ((t - grid.laser1.profile_t_peak)^2) / (grid.laser1.profile_duration^2));
+    ah_hoc_factor = 1e5;
+    Jy_laser = ah_hoc_factor*sin(2*pi*grid.c*t/grid.laser1.wavelength)*(2.0/(grid.mu_0*grid.c))*grid.laser1.E_max * exp(- ((t - grid.laser1.profile_t_peak)^2) / (grid.laser1.profile_duration^2));
 
     %1th order interpolation to Jy
     reim = mod(grid.Nx*(grid.laser1.position+grid.xmin)/(grid.xmax - grid.xmin),1);
