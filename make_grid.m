@@ -2,7 +2,7 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid
 
 %%% Initialize memory %%%
 %[DEFAULT] Setup Grid: (Boundary Grid):
-grid.Nx = 512; % Only specified here 
+grid.Nx = 5120; % Only specified here 
 grid.xmin = 0;
 grid.xmax = 1.0;
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
@@ -10,8 +10,12 @@ grid.time = 0;
 grid.dt = 0.1;
 grid.t_max = 200;
 grid.NT = ceil(grid.t_max/grid.dt);
-grid.Output_interval = 2000;
+grid.Output_interval = 100;
 grid.moving_frame = 0;
+
+%[DEFAULT] Dictates Solve type
+% Options: "FDTD"; "Muscl";
+grid.solve_type_field = "Muscl"; %"FDTD";
 
 %[DEFAULT] Constants, updated in IC.m
 grid.c = 1;
@@ -64,15 +68,25 @@ grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
 
 %Main Grids
 Nx = grid.Nx;
-Ex = zeros(1,Nx-1);
+if grid.solve_type_field == "FDTD"
+    Ex = zeros(1,Nx-1);
+    Jx = zeros(1,Nx-1);
+    By = zeros(1,Nx-1);
+    Bz = zeros(1,Nx-1);
+else
+    Ex = zeros(1,Nx);
+    Jx = zeros(1,Nx);
+    By = zeros(1,Nx);
+    Bz = zeros(1,Nx);
+end
+
 Ey = zeros(1,Nx);
 Ez = zeros(1,Nx);
-Jx = zeros(1,Nx-1);
+
 Jy = zeros(1,Nx);
 Jz = zeros(1,Nx);
 Bx = zeros(1,Nx);
-By = zeros(1,Nx-1);
-Bz = zeros(1,Nx-1);
+
 Ux = zeros(1,Nx);
 Uy = zeros(1,Nx);
 Uz = zeros(1,Nx);
@@ -101,7 +115,6 @@ grid.IC_type = grid.BC_type;
 % grid.BC_type = "Tunneling through an electron-cyclotron cutoff layer";
 % grid.IC_type = grid.BC_type;
 
-
 % JE8: Cuttoff Plasma Wave beach
 % grid.problem_name = "JE8";
 % grid.BC_cond = "Non_Periodic";
@@ -109,12 +122,10 @@ grid.IC_type = grid.BC_type;
 % grid.IC_type = grid.BC_type;
 
 
-
-
 %Make the file/ delete if already exists:
-% grid.filename = "Output/out.txt";
-% if exist(grid.filename, 'file')==2
-%   delete(grid.filename);
-% end
+grid.filename = "Output/out.txt";
+if exist(grid.filename, 'file')==2
+  delete(grid.filename);
+end
 
 end

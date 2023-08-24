@@ -5,15 +5,15 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid] = moving_frame(N,Ex,Ey,Ez,
 if grid.moving_frame == 1
 
     % If this time to add in a new frame
-    if (grid.c*grid.time - grid.xmax)/grid.dx > 1.0
+    if (grid.c*grid.time - grid.xmax + grid.xmax0)/grid.dx > 1.0
 
         %Update grid xmax/xmin
-        grid.xmin = grid.xmin + dx;
-        grid.xmax = grid.xmax + dx;
+        grid.xmin = grid.xmin + grid.dx;
+        grid.xmax = grid.xmax + grid.dx;
 
         % Update grid x1, x2
-        grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
-        grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
+        grid.x1 = linspace(grid.xmin,grid.xmax,grid.Nx);
+        grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,grid.Nx-1);
 
         %Shift quantities
         N = shift_quant(N);
@@ -34,8 +34,9 @@ if grid.moving_frame == 1
         if grid.BC_type == "WFA"
 
             % Only inject density, leave the rest zero:
-            N(grid.Nx) = 2.0e23;
-
+            N(grid.Nx) = density_func(grid.x1(grid.Nx));
+            N(grid.Nx-1) = density_func(grid.x1(grid.Nx-1));
+            N(grid.Nx-2) = density_func(grid.x1(grid.Nx-2));
         end
 
     end
@@ -49,7 +50,7 @@ function [x] = shift_quant(x)
 
 %Compute the size of x
 N = max(size(x));
-NR = linspace(2:N,N-1);
+NR = linspace(2,N,N-1);
 
 x = x(NR);
 x = [x,0]; %Uninitialized RHS

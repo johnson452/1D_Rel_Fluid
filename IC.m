@@ -16,24 +16,21 @@ if grid.BC_type == "WFA"
     grid.e0 = -1.60217663e-19; %Electrons
 
     %Additional inputs [ SI ]
-    grid.xmin = -56.e-6;
-    grid.xmax = 80.e-6;
+    grid.xmin = -100.e-6;
+    grid.xmax = 20.e-6;
+    grid.xmax0 = grid.xmax;
 
     grid.L = (grid.xmax - grid.xmin);
     grid.dx = grid.L/grid.Nx;
     grid.time = 0;
-    grid.cfl = 0.90; %clf = udt/dx <= C_max
+    grid.cfl = 0.99; %clf = udt/dx <= C_max
     grid.dt = grid.cfl*grid.dx/grid.c;
-    grid.NT = 100;
+    grid.NT = 9090;
     grid.t_max = grid.NT*grid.dt;
 
     %New grids
     grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
     grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
-
-    %Density
-    N = N*0.0 + 2.e23;
-    grid.N0 = N(1);
 
     % External quantities
     grid.external_Bx = 0;
@@ -44,7 +41,7 @@ if grid.BC_type == "WFA"
     grid.external_Ey = 0;
     grid.external_Ez = 0;
 
-    grid.moving_frame = 0;
+    grid.moving_frame = 1;
 
     %Laser quantities
     %grid.laser1.profile      = Gaussian;          %assumed
@@ -57,6 +54,11 @@ if grid.BC_type == "WFA"
     grid.laser1.profile_t_peak = 30.e-15;          % Time at which the laser reaches its peak (in s)
     %grid.laser1.profile_focal_distance = 100.e-6  % Focal distance from the antenna (in m)
     grid.laser1.wavelength = 0.8e-6;               % The wavelength of the laser (in m)
+
+    %Density
+    N = density_func(grid.x1);
+    grid.N0 = N(grid.Nx-1);
+
 
 end
 

@@ -10,17 +10,14 @@
 
 
 %Update the quanitites Ux, Uy, Uz (t -> t + dt)
-function [Ux,Uy,Uz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid)
-
-%Locally interpolate U, N to cell centers for update
-%Uy = interp_edge_to_center(Uy,grid);
-%Uz = interp_edge_to_center(Uz,grid);
-%N = interp_edge_to_center(N,grid);
+function [Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid)
 
 % Build Q
 Q = construct(N, Ux, Uy, Uz);
 Nx = grid.Nx;
 
+% TVD Diagnostic
+%[grid] = TVD_diagnostic("start",Q(1,:),Q(2,:),Q(3,:),Q(4,:),grid);
 
 %Iterate over the domain
 % I = linspace(1,Nx-1,Nx-1); %DEFAULT
@@ -41,6 +38,27 @@ end
 %Get edge values (edges_linear)
 % Output: (cell edge values) in cell i
 % [ i - 1/2 (+), i + 1/2 (-) ]
+% Positivity Limiter:
+[Q_plus_I, Q_minus_I] = edges_linear(Q_tilde,dQ);
+limited_cases = 0;
+% Limit for positivity
+for i = 1:grid.Nx
+    if (Q_plus_I(1,i)<0) || (Q_minus_I(1,i)<0) %|| ...
+        %sign(Q_tilde(2,i)) ~= sign(Q_plus_I(2,i)) || sign(Q_tilde(2,i)) ~= sign(Q_minus_I(2,i)) ||...
+        %sign(Q_tilde(3,i)) ~= sign(Q_plus_I(3,i)) || sign(Q_tilde(3,i)) ~= sign(Q_minus_I(3,i)) ||...
+        %sign(Q_tilde(4,i)) ~= sign(Q_plus_I(4,i)) || sign(Q_tilde(4,i)) ~= sign(Q_minus_I(4,i))
+        dQ(1,i) = 0.0;
+        dQ(2,i) = 0.0;
+        dQ(3,i) = 0.0;
+        dQ(4,i) = 0.0;
+        limited_cases = limited_cases + 1;
+    end
+end
+%fprintf("Limited Cases per iteration: %d\n",limited_cases);
+% Recompute Q-tilde
+for i = 1:Nx
+    Q_tilde(:,i) = Q(:,i) - grid.dt/(2*grid.dx)*A(:,:,i)*dQ(:,i);
+end
 [Q_plus_I, Q_minus_I] = edges_linear(Q_tilde,dQ);
 [Q_plus_R, ~] = edges_linear(Q_tilde(:,R),dQ(:,R));
 [~, Q_minus_L] = edges_linear(Q_tilde(:,L),dQ(:,L));
@@ -52,8 +70,17 @@ F_L = Flux(Q_minus_L,Q_plus_I,grid);
 %Compute the updated Q
 Q = Q - grid.dt/(grid.dx)*(F_R - F_L);
 
+% TVD Diagnostic
+%[grid] = TVD_diagnostic("end",Q(1,:),Q(2,:),Q(3,:),Q(4,:),grid);
+
 % Destruct Q into it's components
 [N, Ux, Uy, Uz] = destruct(Q);
+
+%Save the output
+gamma = sqrt(1+(Ux.*Ux + Uy.*Uy + Uz.*Uz)/(grid.c*grid.c));
+Vx = Ux./gamma;
+Vy = Uy./gamma;
+Vz = Uz./gamma;
 
 end
 
@@ -108,7 +135,7 @@ end
 % Averaging
 function [dW] = ave( Wm, Wp )
 
-avg_type = "minmod"; %"Supebee"; %"standard";
+avg_type = "minmod"; %"zero"; %"minmod_more_diff"; %"minmod"; %"Supebee"; %"standard";
 a = Wm; b = Wp;
 ab = a.*b;
 sz_a = size(a);
@@ -117,6 +144,18 @@ dW = zeros(sz_a);
 % Standard Averaging
 if avg_type == "standard"
     dW = (Wm + Wp)/2;
+elseif avg_type == "zero"
+    dW = zeros(sz_a);
+elseif avg_type == "minmod_more_diff"
+    for i = 1:sz_a(1)
+        for j = 1:sz_a(2)
+            if ab(i,j) > 0
+                dW(i,j) = minmod( [(a(i,j) + b(i,j))/2 ,a(i,j), b(i,j)] ); %minmod( [(a(i,j) + b(i,j))/2 , a(i,j), b(i,j)] );
+            else
+                dW(i,j) = 0;
+            end
+        end
+    end
 elseif avg_type == "minmod"
     for i = 1:sz_a(1)
         for j = 1:sz_a(2)

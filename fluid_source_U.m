@@ -17,10 +17,12 @@ function [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_source_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,gr
 %External Fields if applied
 [Bx,By,Bz,Ex,Ey,Ez] = external_fields(Bx,By,Bz,Ex,Ey,Ez,grid);
 
-%Interp all values to cell-centered quantities?
-Ex = interp_center_to_edge(Ex,grid);
-By = interp_center_to_edge(By,grid);
-Bz = interp_center_to_edge(Bz,grid);
+%Interp all values to cell-centered quantities if FDTD
+if grid.solve_type_field == "FDTD"
+    Ex = interp_center_to_edge(Ex,grid);
+    By = interp_center_to_edge(By,grid);
+    Bz = interp_center_to_edge(Bz,grid);
+end
 % **** IMPORTANT ****
 
 %%% H&C Algro %%%
@@ -68,7 +70,7 @@ Uz = u_2_plus + E_2 + (u_0_plus.*t_1 - u_1_plus.*t_0);
 % u_0_plus = s.*( u_0_prime + (dot_u_prime_t).*t_0 + (u_1_prime.*t_2 - u_2_prime.*t_1));
 % u_1_plus = s.*( u_1_prime + (dot_u_prime_t).*t_1 + (u_2_prime.*t_0 - u_0_prime.*t_2));
 % u_2_plus = s.*( u_2_prime + (dot_u_prime_t).*t_2 + (u_0_prime.*t_1 - u_1_prime.*t_0));
-% 
+%
 % %Now for the updated quantities
 % Ux = u_0_plus + E_0;
 % Uy = u_1_plus + E_1;
