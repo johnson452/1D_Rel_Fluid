@@ -17,7 +17,7 @@ Jz = N.*Vz.*grid.e0;
 
 
 %Inject laser in the domain
-if grid.BC_type == "WFA"
+if grid.BC_type == "WFA" && grid.laser_envelope_model ~= "true"
 
     %Laser quantities
     grid.laser1.position    = 9.e-6;               % This point is on the laser plane

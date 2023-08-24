@@ -112,10 +112,30 @@ if (mod ( grid.iter, grid.Output_interval ) == 0 || grid.iter == grid.NT)
 
         % Number density evolution:
         subplot(3,3,9)
-        plot(grid.x1,Uy/c)
-        title("Uy [u/c]")
-        xlabel("x [m]")
-        ylabel("Uy [u/c]")
+        %         plot(grid.x1,Uy/c)
+        %         title("Uy [u/c]")
+        %         xlabel("x [m]")
+        %         ylabel("Uy [u/c]")
+
+        if grid.BC_type == "WFA"
+            rho = grid.e0*N;
+            x1 = grid.x1;
+
+            T = grid.dx;
+            Fs = 1/T;
+            t = x1;
+            L = length(t);
+            X = rho;
+            n = 2^nextpow2(L);
+            Y = fft(X,n);
+            f = 1./(Fs*(0:(n/2))/n);
+            P = abs(Y/n).^2;
+
+            loglog(f/grid.dx,P(1:n/2+1)) 
+            title("FFT(\rho)")
+            xlabel("\lambda/dx")
+            ylabel("|P(f)|^2")
+        end
 
     else
 

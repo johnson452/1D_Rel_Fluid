@@ -16,6 +16,10 @@ function [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_source_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,gr
 
 %External Fields if applied
 [Bx,By,Bz,Ex,Ey,Ez] = external_fields(Bx,By,Bz,Ex,Ey,Ez,grid);
+if grid.BC_type == "WFA" && grid.laser_envelope_model == "true"
+    %Envelope model of the laser
+    [Ex,Ey,Ez,Bx,By,Bz] = external_field_fun(Ex,Ey,Ez,Bx,By,Bz,grid);
+end
 
 %Interp all values to cell-centered quantities if FDTD
 if grid.solve_type_field == "FDTD"

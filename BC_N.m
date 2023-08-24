@@ -10,7 +10,10 @@ elseif grid.BC_type == "Propagation into a plasma wave beach"
 elseif grid.BC_type == "WFA"
     % Last point is a Ghost cell in WFA (matches WarpX)
     N(grid.Nx) = grid.N0; %N(grid.Nx-2);
-    N(1) = N(3);
+    % Only inject density, leave the rest zero:
+    N(grid.Nx) = density_func(grid.x1(grid.Nx));
+    N(grid.Nx-1) = density_func(grid.x1(grid.Nx-1));
+    N(grid.Nx-2) = density_func(grid.x1(grid.Nx-2));
 else
     % All other cases
     N(grid.Nx) = N(grid.Nx-1);

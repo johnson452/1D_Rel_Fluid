@@ -23,9 +23,9 @@ if grid.BC_type == "WFA"
     grid.L = (grid.xmax - grid.xmin);
     grid.dx = grid.L/grid.Nx;
     grid.time = 0;
-    grid.cfl = 0.99; %clf = udt/dx <= C_max
+    grid.cfl = 0.45; %clf = udt/dx <= C_max
     grid.dt = grid.cfl*grid.dx/grid.c;
-    grid.NT = 9090;
+    grid.NT = 20000;
     grid.t_max = grid.NT*grid.dt;
 
     %New grids

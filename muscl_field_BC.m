@@ -4,7 +4,10 @@ if grid.solve_type_field == "Muscl"
     if (grid.BC_type == "WFA")
         N_max = max(size(Bz));
 
-        Ex(1:2) = [0,0];
+        % PEC:
+        % E|| = 0, B_perp = 0
+
+        Ex(1:2) = [0,Ex(3)];
         Ey(1:2) = [0,0];
         Ez(1:2) = [0,0];
 
@@ -13,8 +16,8 @@ if grid.solve_type_field == "Muscl"
         Ez(N_max-1:N_max) = [0,0];
 
         Bx(1:2) = [0,0];
-        By(1:2) = [0,0];
-        Bz(1:2) = [0,0];
+        By(1:2) = [0,By(3)];
+        Bz(1:2) = [0,Bz(3)];
 
         Bx(N_max-1:N_max) = [0,0];
         By(N_max-1:N_max) = [0,0];
