@@ -59,6 +59,10 @@ if grid.BC_type == "WFA"
     N = density_func(grid.x1);
     grid.N0 = N(grid.Nx-1);
 
+    %Isothermal model
+    grid.temp = 1.0; % 1e5;
+    grid.tolerance = 1e-21;
+
 
 end
 

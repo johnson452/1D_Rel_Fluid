@@ -10,7 +10,7 @@
 
 
 %Update the quanitites Ux, Uy, Uz (t -> t + dt)
-function [Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid)
+function [F_L,F_R] = FL(Ux,Uy,Uz,N,grid)
 
 % Build Q
 Q = construct(N, Ux, Uy, Uz);
@@ -25,7 +25,7 @@ R = mod( linspace(1,Nx,Nx), Nx-1) + 1; %mod( linspace(1,Nx,Nx), Nx) + 1; %Good
 L = mod( linspace(-1,Nx-2,Nx), Nx-1) + 1; %mod( linspace(-1,Nx-2,Nx), Nx) + 1; %Good
 
 %Reconstruct U(x) (soln) within one cell, also slope dU
-dQ = reconstruct(Q,Q(:,L),Q(:,R));
+dQ = 0.0*reconstruct(Q,Q(:,L),Q(:,R));
 
 %Update solution, primative variables
 %Q_tilde = Q - grid.dt/(2*grid.dx)*AQ(Q,grid).*dQ;
@@ -43,7 +43,10 @@ end
 limited_cases = 0;
 % Limit for positivity
 for i = 1:grid.Nx
-    if (Q_plus_I(1,i)<0) || (Q_minus_I(1,i)<0) 
+    if (Q_plus_I(1,i)<0) || (Q_minus_I(1,i)<0) || ...
+        sign(Q_tilde(2,i)) ~= sign(Q_plus_I(2,i)) || sign(Q_tilde(2,i)) ~= sign(Q_minus_I(2,i)) ||...
+        sign(Q_tilde(3,i)) ~= sign(Q_plus_I(3,i)) || sign(Q_tilde(3,i)) ~= sign(Q_minus_I(3,i)) ||...
+        sign(Q_tilde(4,i)) ~= sign(Q_plus_I(4,i)) || sign(Q_tilde(4,i)) ~= sign(Q_minus_I(4,i))
         dQ(1,i) = 0.0;
         dQ(2,i) = 0.0;
         dQ(3,i) = 0.0;
@@ -63,21 +66,6 @@ end
 %Update the fluxes
 F_R =  Flux(Q_minus_I,Q_plus_R,grid);
 F_L = Flux(Q_minus_L,Q_plus_I,grid);
-
-%Compute the updated Q
-Q = Q - grid.dt/(grid.dx)*(F_R - F_L);
-
-% TVD Diagnostic
-%[grid] = TVD_diagnostic("end",Q(1,:),Q(2,:),Q(3,:),Q(4,:),grid);
-
-% Destruct Q into it's components
-[N, Ux, Uy, Uz] = destruct(Q);
-
-%Save the output
-gamma = sqrt(1+(Ux.*Ux + Uy.*Uy + Uz.*Uz)/(grid.c*grid.c));
-Vx = Ux./gamma;
-Vy = Uy./gamma;
-Vz = Uz./gamma;
 
 end
 

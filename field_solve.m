@@ -6,7 +6,12 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = field_solve(...
 [Ux,Uy,Uz,Vx,Vy,Vz,grid] = fluid_source_U(Bx,By,Bz,Ex,Ey,Ez,Ux,Uy,Uz,grid);
 [Ux,Uy,Uz,Vx,Vy,Vz] = BC_J(Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
 N = BC_N(N,Vx,Vy,Vz,grid);
-[Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid);
+%[Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U(Ux,Uy,Uz,N,grid);
+%[Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U_FD(Ux,Uy,Uz,N,grid);
+%[Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U_FD_Upwind(Ux,Uy,Uz,N,grid);
+%[Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U_FCT(Ux,Uy,Uz,N,grid);
+%[Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U_Isothermal(Ux,Uy,Uz,N,grid);
+[Ux,Uy,Uz,Vx,Vy,Vz,N,grid] = fluid_grad_U_prims(Ux,Uy,Uz,N,grid);
 [Ux,Uy,Uz,Vx,Vy,Vz] = BC_J(Ux,Uy,Uz,Vx,Vy,Vz,N,grid);
 N = BC_N(N,Vx,Vy,Vz,grid);
 

@@ -15,8 +15,8 @@ grid.moving_frame = 0;
 
 %[DEFAULT] Dictates Solve type
 % Options: "FDTD"; "Muscl";
-grid.solve_type_field = "FDTD";
-grid.laser_envelope_model = "false"; %"true";
+grid.solve_type_field = "FDTD"; %"Muscl"; 
+grid.laser_envelope_model = "false"; %"false"; %"true";
 
 %[DEFAULT] Constants, updated in IC.m
 grid.c = 1;
