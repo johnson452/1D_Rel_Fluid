@@ -16,7 +16,6 @@ clear
 close all
 
 
-
 %Setup field arrays (See PPT)
 [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid();
 

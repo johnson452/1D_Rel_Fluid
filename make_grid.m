@@ -15,7 +15,7 @@ grid.moving_frame = 0;
 
 %[DEFAULT] Dictates Solve type
 % Options: "FDTD"; "Muscl";
-grid.solve_type_field = "FDTD"; %"Muscl"; 
+grid.solve_type_field = "FDTD";%"Muscl"; %"FDTD"; %"Muscl"; 
 grid.laser_envelope_model = "false"; %"false"; %"true";
 
 %[DEFAULT] Constants, updated in IC.m
@@ -29,7 +29,7 @@ grid.e0 = -1; %Electrons
 %[DEFAULT] Grids, updated in IC.m
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
 grid.time = 0;
-grid.cfl = 0.98; %clf = udt/dx <= C_max
+grid.cfl = 0.45; %clf = udt/dx <= C_max
 grid.dt = 0.98*grid.dx/grid.c;
 grid.NT = ceil(grid.t_max/grid.dt);
 

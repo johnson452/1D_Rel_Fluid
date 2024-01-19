@@ -29,33 +29,33 @@ if grid.solve_type_field == "FDTD"
 end
 % **** IMPORTANT ****
 
-%%% H&C Algro %%%
+%%% H&C Algo %%%
 %Grab the vector values (at original time)
 h = grid.dt;
 m0 = grid.m0;
-qmdt = grid.e0*0.5*h./(m0);%Good
+qmdt = grid.e0*0.5*h./(m0);
 c = grid.c;
-E_0 = qmdt.*Ex;%Good
-E_1 = qmdt.*Ey;%Good
-E_2 = qmdt.*Ez;%Good
-B_0 = qmdt.*Bx;%Good
-B_1 = qmdt.*By;%Good
-B_2 = qmdt.*Bz;%Good
+E_0 = qmdt.*Ex;
+E_1 = qmdt.*Ey;
+E_2 = qmdt.*Ez;
+B_0 = qmdt.*Bx;
+B_1 = qmdt.*By;
+B_2 = qmdt.*Bz;
 
-u_0_minus = Ux + E_0;%Good
-u_1_minus = Uy + E_1;%Good
-u_2_minus = Uz + E_2;%Good
+u_0_minus = Ux + E_0;
+u_1_minus = Uy + E_1;
+u_2_minus = Uz + E_2;
 
-u_star = u_0_minus.*(B_0/c) + u_1_minus.*(B_1/c) + u_2_minus.*(B_2/c); %Good
-gamma_minus = sqrt(1 + (u_0_minus.*u_0_minus + u_1_minus.*u_1_minus + u_2_minus.*u_2_minus)/(c*c)); %Good
-dot_tau_tau = (B_0.*B_0 + B_1.*B_1 + B_2.*B_2); %Good
-sigma = gamma_minus.*gamma_minus - dot_tau_tau; %Good
-gamma_new = sqrt(  0.5*(   sigma + sqrt( sigma.*sigma + 4*(dot_tau_tau + u_star.*u_star ) ) )  ); %Good
+u_star = u_0_minus.*(B_0/c) + u_1_minus.*(B_1/c) + u_2_minus.*(B_2/c); 
+gamma_minus = sqrt(1 + (u_0_minus.*u_0_minus + u_1_minus.*u_1_minus + u_2_minus.*u_2_minus)/(c*c)); 
+dot_tau_tau = (B_0.*B_0 + B_1.*B_1 + B_2.*B_2); 
+sigma = gamma_minus.*gamma_minus - dot_tau_tau; 
+gamma_new = sqrt(  0.5*(   sigma + sqrt( sigma.*sigma + 4*(dot_tau_tau + u_star.*u_star ) ) )  ); 
 
-t_0 = B_0./gamma_new; %Good
-t_1 = B_1./gamma_new; %Good
-t_2 = B_2./gamma_new; %Good
-s = 1./(1+(t_0.*t_0 + t_1.*t_1 + t_2.*t_2)); %Good
+t_0 = B_0./gamma_new; 
+t_1 = B_1./gamma_new; 
+t_2 = B_2./gamma_new; 
+s = 1./(1+(t_0.*t_0 + t_1.*t_1 + t_2.*t_2)); 
 
 % FROM WarpX:
 umt = u_0_minus.*t_0 + u_1_minus.*t_1 + u_2_minus.*t_2;

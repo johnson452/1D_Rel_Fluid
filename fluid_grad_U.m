@@ -56,11 +56,21 @@ end
 for i = 1:Nx
     Q_tilde(:,i) = Q(:,i) - grid.dt/(2*grid.dx)*A(:,:,i)*dQ(:,i);
 end
+
+if max(max((isnan(Q_tilde))))
+    fprintf("FAILS: Nan Soln.\n");
+    fprintf("STR: %s\n",str);
+end
+
 [Q_plus_I, Q_minus_I] = edges_linear(Q_tilde,dQ);
 [Q_plus_R, ~] = edges_linear(Q_tilde(:,R),dQ(:,R));
 [~, Q_minus_L] = edges_linear(Q_tilde(:,L),dQ(:,L));
 
 %Update the fluxes
+check(A,"A_main");
+check(dQ,"dQ_main");
+check(Q,"Q_main");
+check(Q_tilde,"Q_tilde");
 F_R =  Flux(Q_minus_I,Q_plus_R,grid);
 F_L = Flux(Q_minus_L,Q_plus_I,grid);
 
@@ -78,6 +88,11 @@ gamma = sqrt(1+(Ux.*Ux + Uy.*Uy + Uz.*Uz)/(grid.c*grid.c));
 Vx = Ux./gamma;
 Vy = Uy./gamma;
 Vz = Uz./gamma;
+
+check(N,"N");
+check(Ux,"Ux");
+check(Uy,"Uy");
+check(Uz,"Uz");
 
 end
 
@@ -98,6 +113,10 @@ N = Q(1,:);
 Ux = Q(2,:)./N;
 Uy = Q(3,:)./N;
 Uz = Q(4,:)./N;
+Ux(N<=0) = 0;
+Uy(N<=0) = 0;
+Uz(N<=0) = 0;
+N(N<=0) = 1.0e10;
 end
 
 %Fluxes N
@@ -118,6 +137,15 @@ c = max( abs(vRx), abs(vLx) ); %%% FIX ABS | lamdba^p|
 FL = vLx.*QL;
 FR = vRx.*QR;
 Fl = (1/2) * ( FR + FL  - c.*( QR - QL ) );
+
+%Stop if isfinite fails
+check(UxR,"UxR")
+check(UyR,"UyR")
+check(UzR,"UzR")
+
+check(FR,"FR")
+check(FL,"FL")
+check(Fl,"Flux_vec")
 
 end
 
@@ -254,5 +282,29 @@ end
 function [W_plus, W_minus] = edges_linear(W_tilde,dW)
 W_plus = W_tilde - dW/2;
 W_minus = W_tilde + dW/2;
+end
+
+
+%Check that X is real and isnotnan
+function check(X,str)
+
+%Stop if isreal fails
+if (~isreal(X))
+    fprintf("FAILS: Not-Real Soln.\n");
+    fprintf("STR: %s\n",str);
+end
+
+%Stop if isnan fails
+if max(isnan(X),[],'all')
+    fprintf("FAILS: Nan Soln.\n");
+    fprintf("STR: %s\n",str);
+end
+
+%Stop if isfinite fails
+if min(isfinite(X),[],'all') == 0
+    fprintf("FAILS: Inf Soln.\n");
+    fprintf("STR: %s\n",str);
+end
+
 end
 

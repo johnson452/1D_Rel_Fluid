@@ -7,6 +7,13 @@ if grid.solve_type_field == "FDTD"
     %grid = energy_momentum_diagnostic(Bx,By,Bz,Ex,Ey,Ez,Jx,Jy,Jz,Ux,Uy,Uz,N,str,grid);
 end
 
+%Save the state of the simulation
+if (mod(grid.iter,5000)==0)
+    file_name = sprintf("wfa_save_state_%d.mat",grid.iter);
+    save(file_name);
+end
+
+
 
 % Run only at select iterations:
 if (mod ( grid.iter, grid.Output_interval ) == 0 || grid.iter == grid.NT)

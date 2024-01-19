@@ -21,15 +21,15 @@ if grid.BC_type == "WFA" && grid.laser_envelope_model ~= "true"
 
     %Laser quantities
     grid.laser1.position    = 9.e-6;               % This point is on the laser plane
-    grid.laser1.E_max        = 16.e12;             % Maximum amplitude of the laser field (in V/m)
+    grid.laser1.E_max        = 10.e12;             % Maximum amplitude of the laser field (in V/m)
     grid.laser1.profile_duration = 15.e-15;        % The duration of the laser (in s)
     grid.laser1.profile_t_peak = 30.e-15;          % Time at which the laser reaches its peak (in s)
     grid.laser1.wavelength = 0.8e-6;               % The wavelength of the laser (in m)
 
     %Laser amplitude (t + dt/2)
     t = grid.time + grid.dt/2;
-    ah_hoc_factor = 16*10*2.4e5;
-    Jy_laser = ah_hoc_factor*sin(2*pi*grid.c*t/grid.laser1.wavelength)*(2.0/(grid.mu_0*grid.c))*grid.laser1.E_max * exp(- ((t - grid.laser1.profile_t_peak)^2) / (grid.laser1.profile_duration^2));
+    ad_hoc_factor = 16*10*2.4e5;
+    Jy_laser = (1/grid.dx)*sin(2*pi*grid.c*t/grid.laser1.wavelength)*(2.0/(grid.mu_0*grid.c))*grid.laser1.E_max * exp(- ((t - grid.laser1.profile_t_peak)^2) / (grid.laser1.profile_duration^2));
 
     %1th order interpolation to Jy
     reim = mod(grid.Nx*(grid.laser1.position-grid.xmin)/(grid.xmax - grid.xmin),1);
