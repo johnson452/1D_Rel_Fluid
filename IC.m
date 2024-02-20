@@ -6,7 +6,7 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid] = IC(N,Ex,Ey,Ez,Bx,By,Bz,J
 Nx = grid.Nx;
 
 %Wake Field Acceleration 1D
-if grid.BC_type == "WFA"
+if grid.BC_type == "WFA" && grid.WFA_type == 1
     %Constants
     grid.c = 299792458.;
     grid.mu_0 = 4*pi*1e-7;
@@ -23,7 +23,7 @@ if grid.BC_type == "WFA"
     grid.L = (grid.xmax - grid.xmin);
     grid.dx = grid.L/grid.Nx;
     grid.time = 0;
-    grid.cfl = 0.45; %0.45; %clf = udt/dx <= C_max
+    grid.cfl = 0.9; %0.45; %clf = udt/dx <= C_max
     grid.dt = grid.cfl*grid.dx/grid.c;
     grid.NT = 20000;
     grid.t_max = grid.NT*grid.dt;
@@ -48,7 +48,7 @@ if grid.BC_type == "WFA"
     grid.laser1.position    = 9.e-6;               % This point is on the laser plane
     %grid.laser1.direction    = 0. 0. 1.           % The plane normal direction
     %grid.laser1.polarization = 0. 1. 0.           % The main polarization vector
-    grid.laser1.E_max        = 16.e12;             % Maximum amplitude of the laser field (in V/m)
+    grid.laser1.E_max        = 10e12; %10.e12;             % Maximum amplitude of the laser field (in V/m)
     %grid.laser1.profile_waist = 5.e-6             % The waist of the laser (in m)
     grid.laser1.profile_duration = 15.e-15;        % The duration of the laser (in s)
     grid.laser1.profile_t_peak = 30.e-15;          % Time at which the laser reaches its peak (in s)
@@ -59,9 +59,139 @@ if grid.BC_type == "WFA"
     N = density_func(grid.x1);
     grid.N0 = N(grid.Nx-1);
 
-    %Isothermal model
-    grid.temp = 1.0; % 1e5;
-    grid.tolerance = 1e-21;
+
+
+end
+
+%Wake Field Acceleration 1D
+if grid.BC_type == "WFA" && grid.WFA_type == 2
+    %Constants
+    grid.c = 299792458.;
+    grid.mu_0 = 4*pi*1e-7;
+    grid.eps_0 = 8.85418781762039e-12;
+    grid.iter = 1;
+    grid.m0 = 9.1093837e-31; %Electrons
+    grid.e0 = -1.60217663e-19; %Electrons
+
+    %Additional inputs [ SI ]
+    grid.xmin = -120.e-6;
+    grid.xmax = 120.e-6;
+    grid.xmax0 = grid.xmax;
+
+    grid.L = (grid.xmax - grid.xmin);
+    grid.dx = grid.L/grid.Nx;
+    grid.time = 0;
+    grid.cfl = 0.9; %0.45; %clf = udt/dx <= C_max
+    grid.dt = grid.cfl*grid.dx/grid.c;
+    grid.NT = 2*2000;
+    grid.t_max = grid.NT*grid.dt;
+
+    %New grids
+    grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
+    grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
+
+    % External quantities
+    grid.external_Bx = 0;
+    grid.external_By = 0;
+    grid.external_Bz = 0;
+
+    grid.external_Ex = 0;
+    grid.external_Ey = 0;
+    grid.external_Ez = 0;
+
+    grid.moving_frame = 0;
+
+    %Laser quantities
+    grid.laser1.position    = 0;               % This point is on the laser plane
+    grid.laser1.E_max        = 10e12; %10.e12;             % Maximum amplitude of the laser field (in V/m)
+    grid.laser1.profile_duration = 15.e-15;        % The duration of the laser (in s)
+    grid.laser1.profile_t_peak = 30.e-15;          % Time at which the laser reaches its peak (in s)
+    grid.laser1.wavelength = 0.8e-6;               % The wavelength of the laser (in m)
+
+    %Density
+    N = 20.e23 + 0*grid.x1;
+    grid.N0 = N(grid.Nx-1);
+
+
+end
+
+
+%Wake Field Acceleration 1D
+if grid.BC_type == "fluid_only_diagnostic"
+    %Constants
+    grid.c = 299792458.;
+    grid.mu_0 = 4*pi*1e-7;
+    grid.eps_0 = 8.85418781762039e-12;
+    grid.iter = 1;
+    grid.m0 = 9.1093837e-31; %Electrons
+    grid.e0 = -1.60217663e-19; %Electrons
+
+    %Additional inputs [ SI ]
+    grid.xmin = -50.e-6;
+    grid.xmax = 170.e-6;
+    grid.xmax0 = grid.xmax;
+
+    grid.L = (grid.xmax - grid.xmin);
+    grid.dx = grid.L/grid.Nx;
+    grid.time = 0;
+    grid.cfl = 0.9; %0.45; %clf = udt/dx <= C_max
+    grid.dt = grid.cfl*grid.dx/grid.c;
+    grid.NT = 200; %3000;
+    grid.t_max = grid.NT*grid.dt;
+
+    %New grids
+    grid.x1 = linspace(grid.xmin,grid.xmax,Nx);
+    grid.x2 = linspace(grid.xmin+grid.dx/2,grid.xmax-grid.dx/2,Nx-1);
+
+    % External quantities
+    grid.external_Bx = 0;
+    grid.external_By = 0;
+    grid.external_Bz = 0;
+
+    grid.external_Ex = 0;
+    grid.external_Ey = 0;
+    grid.external_Ez = 0;
+
+    grid.moving_frame = 0;
+
+    %Laser quantities
+    %grid.laser1.profile      = Gaussian;          %assumed
+    grid.laser1.position    = 9.e-6;               % This point is on the laser plane
+    %grid.laser1.direction    = 0. 0. 1.           % The plane normal direction
+    %grid.laser1.polarization = 0. 1. 0.           % The main polarization vector
+    grid.laser1.E_max        = 16.e12;             % Maximum amplitude of the laser field (in V/m)
+    %grid.laser1.profile_waist = 5.e-6             % The waist of the laser (in m)
+    grid.laser1.profile_duration = 15.e-15;        % The duration of the laser (in s)
+    grid.laser1.profile_t_peak = 30.e-15;          % Time at which the laser reaches its peak (in s)
+    %grid.laser1.profile_focal_distance = 100.e-6  % Focal distance from the antenna (in m)
+    grid.laser1.wavelength = 0.8e-6;               % The wavelength of the laser (in m)
+
+    %Density
+    N = N*0.0 + 20e23;
+    for i = 1:grid.Nx
+        if grid.x1(i) < 0
+            N(i) = 1e10;
+        end
+    end
+
+    % Case 3:
+    %Ux = grid.c + 0.0*grid.c*sin((grid.x1 - grid.xmin)*2*pi/(grid.xmax - grid.xmin));
+    %Uy = grid.c + 0.5*grid.c*sin((grid.x1 - grid.xmin)*2*pi/(grid.xmax - grid.xmin));
+
+    % Case 4:
+    Ux = 0.25*grid.c + 1.0*grid.c*sin(4.0*(grid.x1 - grid.xmin)*2*pi/(grid.xmax - grid.xmin));
+    Uy = 0.25*grid.c + 1.0*grid.c*sin(4.0*(grid.x1 - grid.xmin)*2*pi/(grid.xmax - grid.xmin));
+    grid.N0 = N(grid.Nx-1);
+
+%     for i = 1:grid.Nx
+%         if grid.x1(i) < -3e-5 || grid.x1(i) > 15e-5
+%             Ux(i) = 0;
+%             Uy(i) = 0;
+%         end
+%     end
+
+    %Turn off fields
+    grid.solve_type_field = "None";
 
 
 end

@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Name: Grant Johnson
-%Date: 3/31/2022
+%Date: 3/31/2023
 %Yee algorithm *1D*
 %J from relativistic fluid description.
 
@@ -26,9 +26,6 @@ close all
 %%% Main code: %%%
 %Initial Conditions (at n - 1)
 [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid] = IC(N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,grid);
-
-%Make the diagnostic Figure
-figure('units','normalized','outerposition',[0 0 0.5 0.5])
 
 %%% Time loop %%%
 while(grid.time < grid.t_max)

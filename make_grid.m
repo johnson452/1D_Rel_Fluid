@@ -2,7 +2,7 @@ function [N,Ex,Ey,Ez,Bx,By,Bz,Jx,Jy,Jz,Ux,Uy,Uz,Vx,Vy,Vz,grid] = make_grid
 
 %%% Initialize memory %%%
 %[DEFAULT] Setup Grid: (Boundary Grid):
-grid.Nx = 5120; % Only specified here 
+grid.Nx = 2*5120; % Only specified here 
 grid.xmin = 0;
 grid.xmax = 1.0;
 grid.dx = (grid.xmax - grid.xmin)/grid.Nx;
@@ -15,7 +15,7 @@ grid.moving_frame = 0;
 
 %[DEFAULT] Dictates Solve type
 % Options: "FDTD"; "Muscl";
-grid.solve_type_field = "FDTD";%"Muscl"; %"FDTD"; %"Muscl"; 
+grid.solve_type_field = "FDTD"; %"Muscl"; %"FDTD"; %"Muscl"; 
 grid.laser_envelope_model = "false"; %"false"; %"true";
 
 %[DEFAULT] Constants, updated in IC.m
@@ -97,10 +97,25 @@ Vy = zeros(1,Nx);
 Vz = zeros(1,Nx);
 
 % WFA
+% grid.problem_name = "WFA";
+% grid.BC_cond = "Non_Periodic";
+% grid.BC_type = "WFA";
+% grid.WFA_type = 1;
+% grid.IC_type = grid.BC_type;
+
+% WFA2: Energy diagnostic 
 grid.problem_name = "WFA";
 grid.BC_cond = "Non_Periodic";
 grid.BC_type = "WFA";
+grid.WFA_type = 2;
 grid.IC_type = grid.BC_type;
+
+%fluid diagnostic
+% grid.problem_name = "Fluid Diagnostic";
+% grid.BC_cond = "Non_Periodic";
+% grid.BC_type = "fluid_only_diagnostic";
+% grid.IC_type = grid.BC_type;
+
 
 % BCs and ICs extensions
 % grid.BC_cond = "Periodic";
